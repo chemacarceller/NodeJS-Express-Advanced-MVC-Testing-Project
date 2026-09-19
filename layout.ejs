@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/layout.css">
+    <%- style %>
+    <script type="text/javascript" src="js/layout.js"></script>
+    <%- defineContent('scripts') %>
+</head>
+<body>
+    <nav>
+        <a href="/">Home</a>
+    </nav>
+    <main>
+        <%- body %>
+    </main>
+
+    <footer>
+        <p>© 2026 My Testing Web Site</p>
+    </footer>
+</body>
+</html>
