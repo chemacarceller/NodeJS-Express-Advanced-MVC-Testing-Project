@@ -1,8 +1,8 @@
-  <%- contentFor('scripts') %>
-  <script type="text/javascript" src="js/users.js"></script>
-  <%- contentFor('body') %>
-  <ul>
-    <% usersList.forEach(user => { %>
-      <li>ID: <%= user.id %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NOMBRE: <%= user.name %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EMAIL: <%= user.email %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ROLE: <%= user.role %></li>
-    <% }); %>
-  </ul>
+    <%- contentFor('scripts') %>
+    <script type="text/javascript" src="js/users.js"></script><%- -%>
+        <%- contentFor('body') %>
+        <ul>
+<% usersList.forEach(user => { -%>
+            <li>ID: <%= user.id %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NOMBRE: <%= user.name %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EMAIL: <%= user.email %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ROLE: <%= user.role %></li>
+<% }); -%>
+        </ul>

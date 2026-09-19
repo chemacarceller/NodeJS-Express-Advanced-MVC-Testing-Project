@@ -4,18 +4,19 @@
     <meta charset="UTF-8">
     <title><%= title %></title>
     <link rel="stylesheet" href="/css/layout.css">
+<% if (typeof style !== 'undefined' && style) { -%>
     <%- style %>
+<% } -%>
     <script type="text/javascript" src="js/layout.js"></script>
-    <%- defineContent('scripts') %>
+<%- defineContent('scripts') %>
 </head>
 <body>
     <nav>
         <a href="/">Home</a>
     </nav>
     <main>
-        <%- body %>
+<%- body -%>
     </main>
-
     <footer>
         <p>© 2026 My Testing Web Site</p>
     </footer>
