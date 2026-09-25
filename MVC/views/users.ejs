@@ -1,8 +1,12 @@
     <%- contentFor('scripts') %>
     <script type="text/javascript" src="js/users.js"></script><%- -%>
         <%- contentFor('body') %>
-        <ul>
+    <h1>Panel de usuarios (<%= usersList.length %>)</h1>
+    <p>Gestión de miembros del equipo :</p>
+
+    <div style=' display: grid;  gap: 1rem;  margin-top: 1rem; padding: "2rem"; font-family: "sans-serif" '>
 <% usersList.forEach(user => { -%>
-            <li>ID: <%= user.id %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NOMBRE: <%= user.name %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EMAIL: <%= user.email %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ROLE: <%= user.role %></li>
+    <div key={user.id} style=' padding: 1rem; border: 1px solid #ccc; border-radius: 8px;'>
+        <strong>ID: <%= user.id %> - NOMBRE : <%= user.name %></strong> — <span style=' color: "#666" '><%= user.email %></span> — <span style='color: "#666" '><%= user.role %></span>
+    </div>
 <% }); -%>
-        </ul>

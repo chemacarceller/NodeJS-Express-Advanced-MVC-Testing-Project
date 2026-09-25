@@ -1,4 +1,28 @@
 
+class Usuario {
+
+    constructor( id = null, name, email, status, role ) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.status = status;
+        this.role = role;
+    }
+
+    cambiarEmail(nuevoEmail) {
+        if (!nuevoEmail.includes('@')) {
+            throw new Error("El formato del email es inválido.");
+        }
+        this.email = nuevoEmail;
+    }
+}
+
+module.exports = Usuario;
+
+/*
+
+// Codigo ejemplo para acceder a MongoDB
+
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
@@ -28,7 +52,12 @@ const userSchema = new mongoose.Schema({
 
 module.exports = userSchema;
 
+*/
+
+
 /*
+
+// Codigo ejemplo para acceder a BBDD relacionales mediante sequelize
 
 const { DataTypes } = require('sequelize');
 

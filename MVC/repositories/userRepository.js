@@ -1,5 +1,5 @@
-const createConnection = require('../../config/database');
-const userSchema = require('../models/userModel'); 
+//const createConnection = require('../../config/database');
+const Usuario = require('../models/userModel'); 
 
 //const dbConnection = createConnection(process.env.MONGO_URI);
 
@@ -42,11 +42,10 @@ const findById = async (id) => {
   // Hardcoded data for testing
   return new Promise((resolve) => {
     setTimeout(() => {
-      const user = mockUsers.find(u => u.id === id);
-      resolve(user ? { ...user } : null);
+      const u = mockUsers.find(u => u.id === id);
+      resolve(u ? { ...new Usuario(u.id, u.name, u.email, u.status, u.role) } : null);
     }, 50);
   });
-
 
 };
 
@@ -83,10 +82,13 @@ const findAllActive = async () => {
   // Hardcoded data for testing
   return new Promise((resolve) => {
     setTimeout(() => {
-      const activeUsers = mockUsers.filter(u => u.status === 'active');
-      resolve(activeUsers.map(u => ({ ...u })));
+      const activeUsers = mockUsers.filter(u => u.status === 'active')
+      .map(u => new Usuario(u.id, u.name, u.email, u.status, u.role));
+
+       resolve(activeUsers);
     }, 50);
   });
+
 
 
 };
