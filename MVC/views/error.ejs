@@ -2,5 +2,7 @@
     <%- contentFor('scripts') %>
     <script type="text/javascript" src="js/error.js"></script><%- -%>
         <%- contentFor('body') %>
-        <h1>Error <%= errorCodecode %></h1>
-        <p><%= message %></p>
+        <div class="contenedorError">
+            <h1>Error <%= errorCodecode %></h1>
+            <p><%= message %></p>
+        </div>

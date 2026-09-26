@@ -1,5 +1,5 @@
-
-class Usuario {
+// Application entity class related to users
+class User {
 
     constructor( id = null, name, email, status, role ) {
         this.id = id;
@@ -9,19 +9,19 @@ class Usuario {
         this.role = role;
     }
 
-    cambiarEmail(nuevoEmail) {
-        if (!nuevoEmail.includes('@')) {
-            throw new Error("El formato del email es inválido.");
+    changeEmail(newEmail) {
+        if (!newEmail.includes('@')) {
+            throw new Error("The email format is invalid");
         }
-        this.email = nuevoEmail;
+        this.email = newEmail;
     }
 }
 
-module.exports = Usuario;
+module.exports = User;
 
 /*
 
-// Codigo ejemplo para acceder a MongoDB
+// Example code to access MongoDB
 
 const mongoose = require('mongoose');
 
@@ -57,7 +57,7 @@ module.exports = userSchema;
 
 /*
 
-// Codigo ejemplo para acceder a BBDD relacionales mediante sequelize
+// Example code for accessing relational databases using Sequelize.
 
 const { DataTypes } = require('sequelize');
 

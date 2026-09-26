@@ -1,3 +1,4 @@
+/*
 const mongoose = require('mongoose');
 
 const createConnection = (uri) => {
@@ -27,3 +28,4 @@ const createConnection = (uri) => {
 };
 
 module.exports = createConnection;
+*/

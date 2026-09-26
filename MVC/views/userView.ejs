@@ -1,12 +1,12 @@
     <%- contentFor('scripts') %>
     <script type="text/javascript" src="js/users.js"></script><%- -%>
         <%- contentFor('body') %>
-    <h1>Panel de usuarios (<%= usersList.length %>)</h1>
-    <p>Gestión de miembros del equipo :</p>
+    <h1>User panel (<%= usersList.length %>)</h1>
+    <p>Team active member management :</p>
 
     <div style=' display: grid;  gap: 1rem;  margin-top: 1rem; padding: "2rem"; font-family: "sans-serif" '>
 <% usersList.forEach(user => { -%>
     <div key={user.id} style=' padding: 1rem; border: 1px solid #ccc; border-radius: 8px;'>
-        <strong>ID: <%= user.id %> - NOMBRE : <%= user.name %></strong> — <span style=' color: "#666" '><%= user.email %></span> — <span style='color: "#666" '><%= user.role %></span>
+        <strong>ID: <%= user.id %> - NAME : <%= user.name %></strong> — <span style=' color: "#666" '><%= user.email %></span> — <span style='color: "#666" '><%= user.role %></span>
     </div>
 <% }); -%>

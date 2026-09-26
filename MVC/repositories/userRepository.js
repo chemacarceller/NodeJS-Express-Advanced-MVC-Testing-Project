@@ -1,10 +1,11 @@
+// We create a model object, which is what the repository class will return.
+const User = require('../models/userModel'); 
+
 //const createConnection = require('../../config/database');
-const Usuario = require('../models/userModel'); 
-
 //const dbConnection = createConnection(process.env.MONGO_URI);
-
 //const UserModel = dbConnection.model('User', userSchema);
 
+// built-in data
 const mockUsers = [
   { id: '1', name: 'Alice', email: 'alice@example.com', status: 'active', role: 'admin' },
   { id: '2', name: 'Bob', email: 'bob@example.com', status: 'active', role: 'user' },
@@ -13,16 +14,20 @@ const mockUsers = [
 
 
 const findById = async (id) => {
-//  try {
-//    return await UserModel.findById(id).lean();
-//  } catch (error) {
-//    throw new Error(`Repository error while searching for ID ${id}: ${error.message}`);
-//   }
+
+/*  MONGODB
+    try {
+      return await UserModel.findById(id).lean();
+    } catch (error) {
+      throw new Error(`Repository error while searching for ID ${id}: ${error.message}`);
+    }
+*/
+
 
   /* 
   try {
   
-  const userRaw = await User.findByPk(id, { raw: true });
+    const userRaw = await User.findByPk(id, { raw: true });
     
     if (!userRaw) return null;
     
@@ -38,24 +43,25 @@ const findById = async (id) => {
   }
   */
 
-
-  // Hardcoded data for testing
+  // Returns the data found by ID.
   return new Promise((resolve) => {
     setTimeout(() => {
       const u = mockUsers.find(u => u.id === id);
-      resolve(u ? { ...new Usuario(u.id, u.name, u.email, u.status, u.role) } : null);
+      resolve(u ? { ...new User(u.id, u.name, u.email, u.status, u.role) } : null);
     }, 50);
   });
 
 };
 
 const findAllActive = async () => {
-//  try {
-//    return await UserModel.find({ status: 'active' }).lean();
-//  } catch (error) {
-//    throw new Error(`Repository error while listing active users: ${error.message}`);
-//  }
 
+/* MONGODB
+  try {
+    return await UserModel.find({ status: 'active' }).lean();
+  } catch (error) {
+    throw new Error(`Repository error while listing active users: ${error.message}`);
+  }
+*/
 
   /*
   try {
@@ -79,11 +85,11 @@ const findAllActive = async () => {
   */
 
 
-  // Hardcoded data for testing
+  // Returns all active records.
   return new Promise((resolve) => {
     setTimeout(() => {
       const activeUsers = mockUsers.filter(u => u.status === 'active')
-      .map(u => new Usuario(u.id, u.name, u.email, u.status, u.role));
+      .map(u => new User(u.id, u.name, u.email, u.status, u.role));
 
        resolve(activeUsers);
     }, 50);

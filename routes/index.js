@@ -1,16 +1,15 @@
+const indexController = require('../MVC/controllers/indexController'); 
+
 const express = require('express');
+
+// Create a modular and isolated router in Express
 const router = express.Router();
 
-const usersRouter = require('./users');
+// Route handling for `/users` is moved to the `./users.js` file—that is, the same level as `index.js`.
+const usersRouter = require('./users.js');
 router.use('/users', usersRouter); 
 
-router.get('/', (req, res) => {
-
-    // Renders the 'views/index.ejs' file and passes data to it
-    res.render('index', { 
-        title: 'Home - My Testing Web Site',
-        message: 'Hello! EJS is configured correctly.' 
-    });
-});
+// The home route is handled via indexController.start
+router.get('/', indexController.start); 
 
 module.exports = router;
