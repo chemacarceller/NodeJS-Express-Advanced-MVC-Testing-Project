@@ -1,4 +1,11 @@
 // The service class uses the repository class to access data and implements business logic.
-const indexRepository = require('../repositories/indexRepository');
+const IndexRepository = require('../repositories/indexRepository');
 
-module.exports = { };
+class IndexService { 
+
+    constructor() {
+        this.indexRepository = new IndexRepository();
+    }
+};
+
+module.exports = IndexService;

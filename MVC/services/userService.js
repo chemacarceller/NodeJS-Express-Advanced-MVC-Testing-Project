@@ -1,23 +1,28 @@
 // The service class uses the repository class to access data and implements business logic.
-const userRepository = require('../repositories/userRepository');
+const UserRepository = require('../repositories/userRepository');
 
-const getUsersForList = async () => {
-  try {
+class UserService {
 
-    // Data are requested via a repository
-    const users = await userRepository.findAllActive();
-    
-    // The data are validated
-    if (!users || users.length === 0) {
-      throw new Error('There are no active registered users.');
-    }
-    
-    // The data are returned
-    return users;
-    
-  } catch (error) {
-      throw error;
+  constructor() {
+    this.userRepository = new UserRepository();
+    this.getUsersForList = this.getUsersForList.bind(this);
   }
-};
 
-module.exports = { getUsersForList };
+  async getUsersForList() {
+    try {
+
+      const users = await this.userRepository.findAllActive();
+      
+      if (!users || users.length === 0) {
+        throw new Error('There are no active registered users.');
+      }
+      
+      return users;
+      
+    } catch (error) {
+        throw error;
+    }
+  }
+}
+
+module.exports = UserService;

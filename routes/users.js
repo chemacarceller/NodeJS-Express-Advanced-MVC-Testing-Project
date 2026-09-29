@@ -1,8 +1,8 @@
-const userController = require('../MVC/controllers/userController'); 
+const UserController = require('../MVC/controllers/userController');
 const express = require('express');
 const router = express.Router();
 
-// The users route is handled via userController.listUsers
+const userController = new UserController();
 router.get('/', userController.listUsers); 
 
 module.exports = router;

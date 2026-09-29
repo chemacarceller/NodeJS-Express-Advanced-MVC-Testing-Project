@@ -1,4 +1,4 @@
-const indexController = require('../MVC/controllers/indexController'); 
+const IndexController = require('../MVC/controllers/indexController'); 
 
 const express = require('express');
 
@@ -10,6 +10,7 @@ const usersRouter = require('./users.js');
 router.use('/users', usersRouter); 
 
 // The home route is handled via indexController.start
+const indexController = new IndexController();
 router.get('/', indexController.start); 
 
 module.exports = router;
