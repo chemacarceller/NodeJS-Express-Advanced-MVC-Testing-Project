@@ -32,9 +32,14 @@ app.set("layout extractStyles", true);
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Loads and connects the main router (route aggregator from the routes folder)
-// The home route is managed via an index.js file located within ./routes.
-const apiRouter = require('./routes');
-app.use('/', apiRouter);
+// The home route is managed via an WebRoutes.js file located within ./routes
+const WebRoutes = require('./routes/WebRoutes');
+app.use('/', WebRoutes);
+
+// The AJAX routes (classes that return res.json) managed via an ApiRoyes.js file located within ./routes
+const ApiRoutes = require('./routes/ApiRoutes');
+app.use('/api', ApiRoutes); 
+
 
 
 

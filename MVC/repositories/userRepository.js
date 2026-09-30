@@ -9,14 +9,20 @@ const UserModel = require('../models/userModel');
 const mockUsers = [
   { id: '1', name: 'Alice', email: 'alice@example.com', status: 'active', role: 'admin' },
   { id: '2', name: 'Bob', email: 'bob@example.com', status: 'active', role: 'user' },
-  { id: '3', name: 'Charlie', email: 'charlie@example.com', status: 'inactive', role: 'user' }
+  { id: '3', name: 'Charlie', email: 'charlie@example.com', status: 'inactive', role: 'user' },
+  { id: '4', name: 'John', email: 'john@example.com', status: 'inactive', role: 'admin' }
 ];
+
+
+
+
+
 
 class UserRepository {
 
   constructor() {
     this.findById = this.findById.bind(this);
-    this.findAllActive = this.findAllActive.bind(this);
+    this.findAllActive = this.findAll.bind(this);
   }
 
   async findById(id) {
@@ -87,7 +93,7 @@ const findAllActive = async () => {
     });
   }
 
-  async findAllActive() {
+  async findAll(activeUser = true) {
 
     /* MONGODB
     try {
@@ -122,11 +128,18 @@ const findAllActive = async () => {
     // Returns all active records.
     return new Promise((resolve) => {
       setTimeout(() => {
-        const activeUsers = mockUsers.filter(u => u.status === 'active')
-          .map(u => new UserModel(u.id, u.name, u.email, u.status, u.role));
+        if (activeUser===true) {
+          const activeUsers = mockUsers.filter(u => u.status === 'active')
+            .map(u => new UserModel(u.id, u.name, u.email, u.status, u.role));
 
-        resolve(activeUsers);
-      }, 50);
+          resolve(activeUsers);
+        } else {
+          const inactiveUsers = mockUsers.filter(u => u.status === 'inactive')
+            .map(u => new UserModel(u.id, u.name, u.email, u.status, u.role));
+            
+          resolve(inactiveUsers);
+        }
+      }, 50); // <-- El tiempo de 'setTimeout' va AQUÍ, antes de cerrar la Promesa
     });
   }
 }

@@ -1,4 +1,4 @@
-const IndexController = require('../MVC/controllers/indexController'); 
+const HomeController = require('../MVC/controllers/homeController'); 
 
 const express = require('express');
 
@@ -6,11 +6,11 @@ const express = require('express');
 const router = express.Router();
 
 // Route handling for `/users` is moved to the `./users.js` file—that is, the same level as `index.js`.
-const usersRouter = require('./users.js');
+const usersRouter = require('./UserRoute');
 router.use('/users', usersRouter); 
 
 // The home route is handled via indexController.start
-const indexController = new IndexController();
-router.get('/', indexController.start); 
+const homeController = new HomeController();
+router.get('/', homeController.start); 
 
 module.exports = router;

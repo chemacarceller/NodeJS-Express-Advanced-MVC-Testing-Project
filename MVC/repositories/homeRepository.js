@@ -1,11 +1,11 @@
 // We create a model object, which is what the repository class will return.
-const IndexModel = require('../models/indexModel'); 
+const HomeModel = require('../models/homeModel'); 
 
 const createConnection = require('../../config/database');
 
-class UserRepository { 
+class HomeRepository { 
     constructor() { 
     }
 };
 
-module.exports = UserRepository;
+module.exports = HomeRepository;

@@ -1,5 +1,5 @@
 // Application entity class related to users
-class User {
+class UserModel {
 
     constructor( id = null, name, email, status, role ) {
         this.id = id;
@@ -17,7 +17,7 @@ class User {
     }
 }
 
-module.exports = User;
+module.exports = UserModel;
 
 /*
 
