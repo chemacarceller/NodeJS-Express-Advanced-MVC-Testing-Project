@@ -10,7 +10,8 @@ const mockUsers = [
   { id: '1', name: 'Alice', email: 'alice@example.com', status: 'active', role: 'admin' },
   { id: '2', name: 'Bob', email: 'bob@example.com', status: 'active', role: 'user' },
   { id: '3', name: 'Charlie', email: 'charlie@example.com', status: 'inactive', role: 'user' },
-  { id: '4', name: 'John', email: 'john@example.com', status: 'inactive', role: 'admin' }
+  { id: '4', name: 'John', email: 'john@example.com', status: 'inactive', role: 'admin' },
+  { id: '5', name: 'Joseph', email: 'joseph@example.com', status: 'inactive', role: 'user' }
 ];
 
 

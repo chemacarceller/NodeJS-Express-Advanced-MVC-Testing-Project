@@ -9,6 +9,9 @@ const router = express.Router();
 const usersRouter = require('./UserRoute');
 router.use('/users', usersRouter); 
 
+const speechAIRouter = require('./SpeechAIRoute');
+router.use('/speechAI', speechAIRouter); 
+
 // The home route is handled via indexController.start
 const homeController = new HomeController();
 router.get('/', homeController.start); 
