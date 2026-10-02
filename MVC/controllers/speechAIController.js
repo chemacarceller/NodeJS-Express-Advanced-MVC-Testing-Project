@@ -1,12 +1,10 @@
-// We obtain the service object responsible for requesting data from the repository object.
-// and implement the potential business logic
-const SppechAIService = require('../services/speechAIService');
+const SpeechAIService = require('../services/speechAIService');
 
 // The controller class simply manages data loading and view rendering.
 class SpeechAIController {
 
   constructor() {
-    this.speechAIService = new SppechAIService();
+    this.speechAIService = new SpeechAIService();
     this.start = this.start.bind(this);
   }
 

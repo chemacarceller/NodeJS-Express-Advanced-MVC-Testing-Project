@@ -1,9 +1,5 @@
-// We create a model object, which is what the repository class will return.
+// We create a model object, the repository class will return a Promise including an array of this object 
 const UserModel = require('../models/userModel'); 
-
-//const createConnection = require('../../config/database');
-//const dbConnection = createConnection(process.env.MONGO_URI);
-//const UserModel = dbConnection.model('User', userSchema);
 
 // built-in data
 const mockUsers = [
@@ -15,118 +11,14 @@ const mockUsers = [
 ];
 
 
-
-
-
-
 class UserRepository {
 
   constructor() {
-    this.findById = this.findById.bind(this);
-    this.findAllActive = this.findAll.bind(this);
+    this.findAll = this.findAll.bind(this);
   }
 
-  async findById(id) {
-
-    /*  MONGODB
-    try {
-      return await UserModel.findById(id).lean();
-    } catch (error) {
-      throw new Error(`Repository error while searching for ID ${id}: ${error.message}`);
-    }  return new Promise((resolve) => {
-    setTimeout(() => {
-      const u = mockUsers.find(u => u.id === id);
-      resolve(u ? { ...new User(u.id, u.name, u.email, u.status, u.role) } : null);
-    }, 50);
-  });
-
-};
-
-const findAllActive = async () => {
-
-/* MONGODB
-  try {
-    return await UserModel.find({ status: 'active' }).lean();
-  } catch (error) {
-    throw new Error(`Repository error while listing active users: ${error.message}`);
-  }
-*/
-
-  /*
-  try {
-
-    const activeUsersRaw = await User.findAll({
-      where: { status: 'active' },
-      raw: true
-    });
-    
-    return activeUsersRaw.map(userRaw => ({
-      id: userRaw.id,
-
-    */
-
-
-    /* 
-    try {
-  
-      const userRaw = await User.findByPk(id, { raw: true });
-    
-      if (!userRaw) return null;
-    
-      return {
-        id: userRaw.id,
-        displayName: userRaw.name,
-        email: userRaw.email,
-        role: userRaw.role,
-        status: userRaw.status
-      };
-    } catch (error) {
-      throw new Error(`Repository error while searching for ID ${id} with Sequelize: ${error.message}`);
-    }
-    */
-
-    // Returns the data found by ID.
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const u = mockUsers.find(u => u.id === id);
-        resolve(u ? { ...new UserModel(u.id, u.name, u.email, u.status, u.role) } : null);
-      }, 50);
-    });
-  }
 
   async findAll(activeUser = true) {
-
-    /* MONGODB
-    try {
-      return await UserModel.find({ status: 'active' }).lean();
-    } catch (error) {
-      throw new Error(`Repository error while listing active users: ${error.message}`);
-    }
-    */
-
-    /*
-    try {
-
-      const activeUsersRaw = await User.findAll({
-        where: { status: 'active' },
-        raw: true
-      });
-    
-      return activeUsersRaw.map(userRaw => ({
-        id: userRaw.id,
-        displayName: userRaw.name,
-        email: userRaw.email,
-        role: userRaw.role,
-        status: userRaw.status
-      }));
-
-    } catch (error) {
-      throw new Error(`Repository error when listing active users with Sequelize: ${error.message}`);
-    }
-    */
-
-
-    // Returns all active records.
     return new Promise((resolve) => {
       setTimeout(() => {
         if (activeUser===true) {

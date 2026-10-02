@@ -1,8 +1,6 @@
-// We obtain the service object responsible for requesting data from the repository object.
-// and implement the potential business logic
 const UserService = require('../services/userService');
 
-// The controller class simply manages data loading and view rendering.
+
 class UserController {
 
   constructor() {

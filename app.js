@@ -13,7 +13,6 @@ const path = require('path');
 
 // creates an instance of the Express application and stores it in the variable named `app`.
 const app = express();
-const PORT = 3000;
 app.locals.title = 'My Testing Web Site'; 
 
 // EJS template engine configuration

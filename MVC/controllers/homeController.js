@@ -1,8 +1,6 @@
-// We obtain the service object responsible for requesting data from the repository object.
-// and implement the potential business logic
 const HomeService = require('../services/homeService');
 
-// The controller class simply manages data loading and view rendering.
+
 class HomeController {
 
   constructor() {
@@ -16,8 +14,8 @@ class HomeController {
 
       // No data to retrieve on this home page
     
-      // Renders the 'views/indexView.ejs' file and passes data to it
-      res.render('indexView', { 
+      // Renders the 'views/homeView.ejs' file and passes data to it
+      res.render('homeView', { 
         title: 'Home - My Testing Web Site',
         message: 'Hello! EJS is configured correctly.' 
       });
