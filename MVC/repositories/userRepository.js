@@ -140,7 +140,7 @@ const findAllActive = async () => {
             
           resolve(inactiveUsers);
         }
-      }, 50); // <-- El tiempo de 'setTimeout' va AQUÍ, antes de cerrar la Promesa
+      }, 50);
     });
   }
 }
