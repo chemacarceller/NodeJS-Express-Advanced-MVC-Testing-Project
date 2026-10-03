@@ -16,7 +16,7 @@ class SpeechAIController {
     
       // Renders the 'views/indexView.ejs' file and passes data to it
       res.render('speechAIView', { 
-        title: 'SpeechAI - My Testing Speech for AI',
+        title: 'Speech AI - My Testing Web Site',
       });
     
     } catch (error) {

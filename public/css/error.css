@@ -1,2 +1,2 @@
-.contenedorError { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f9f9f9; color: #333; }
-.contenedorError h1 { font-size: 50px; margin-bottom: 10px; color: #e74c3c; }
+.error-layout {   font-family: Arial, sans-serif;   text-align: center;   padding: 50px;   background-color: #f9f9f9;   color: #333; }
+.error-layout h1 {  color: #e74c3c; }

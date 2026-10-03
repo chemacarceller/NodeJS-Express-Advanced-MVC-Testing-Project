@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="/css/users.css">    
     <%- contentFor('scripts') %>
     <script type="text/javascript" src="js/users.js"></script>
     <%- -%>
@@ -5,14 +6,14 @@
     <%- contentFor('body') %>
     <h1>User panel (<span id="users-count"><%= usersList.length %></span>)</h1>
     <p>Team Member management :</p>
-    <button id="btn-toggle-status" data-showing-active="true" style="padding: 0.5rem 1rem; cursor: pointer; margin-bottom: 1rem;">
+    <button id="btn-toggle-status" data-showing-active="true">
         Show Inactive Users
     </button>
 
-    <div id="users-container" style='display: grid; gap: 1rem; margin-top: 1rem; font-family: "sans-serif"'>
+    <div id="users-container">
 <% usersList.forEach(user => { -%>
-        <div style='padding: 1rem; border: 1px solid #ccc; border-radius: 8px;'>
-            <strong>ID: <%= user.id %> - NAME : <%= user.name %></strong> — <span style='color: #666'><%= user.email %></span> — <span style='color: #666'><%= user.role %></span>
+        <div>
+            <strong>ID: <%= user.id %> - NAME : <%= user.name %></strong> — <span><%= user.email %></span> — <span><%= user.role %></span>
         </div>
 <% }); -%>
     </div>

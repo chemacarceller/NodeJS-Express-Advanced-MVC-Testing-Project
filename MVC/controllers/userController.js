@@ -16,7 +16,7 @@ class UserController {
 
       // Display the users view
       res.render('userView', { 
-        title: 'User List', 
+        title: 'UserList - My Testing Web Site',
         usersList: users 
       });
 
