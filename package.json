@@ -9,11 +9,12 @@
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "ejs": "^6.0.1",
-    "express": "~4.16.1",
+    "express": "^4.22.3",
     "express-ejs-layouts": "^2.5.1",
     "http-errors": "~1.6.3",
-    "jade": "~1.11.0",
     "mongoose": "^9.10.1",
-    "morgan": "~1.9.1"
+    "morgan": "^1.12.1",
+    "ollama": "^0.6.4",
+    "pug": "^3.0.4"
   }
 }

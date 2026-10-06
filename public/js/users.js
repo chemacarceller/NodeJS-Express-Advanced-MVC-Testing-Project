@@ -1,10 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    console.log("Testing users.js... " + Math.floor(Math.random() * 100000));
+
     const btnToggle = document.getElementById('btn-toggle-status');
     const usersContainer = document.getElementById('users-container');
     const usersCount = document.getElementById('users-count');
 
     btnToggle.addEventListener('click', async () => {
+
+        console.log("Testing btnToggle.addEventListener... " + Math.floor(Math.random() * 100000));
 
         // Read the current state from the data attribute
         const showingActive = btnToggle.getAttribute('data-showing-active') === 'true';
