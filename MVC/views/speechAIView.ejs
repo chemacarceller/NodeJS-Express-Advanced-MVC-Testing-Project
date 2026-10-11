@@ -1,19 +1,19 @@
 <link rel="stylesheet" href="/css/speechAI.css">
 <%- contentFor('scripts') %>
-<script type="text/javascript" src="js/speechAI.js"></script>
+<script type="module" src="js/speechAI.js"></script>
 <%- contentFor('body') %>
 
     <h2>Speech to Text AI</h2>
     <p>Press the button to start speaking and fill in the text field.</p>
 
     <div class="voice-container">
-        <textarea id="texto-resultado" placeholder="Your dictated text will appear here..." rows="8" cols="128"></textarea>&nbsp;
+        <textarea id="inputMessage" placeholder="Your dictated text will appear here..." rows="8" cols="128"></textarea>&nbsp;
         <button id="btn-microfono" class="btn-mic"><span id="estado-mic">Start Dictation</span></button>&nbsp;&nbsp;&nbsp;
-        <button id="btn-send" class="btn-mic"><span id="estado-send">Send</span></button>
+        <button id="btnSend" class="btn-mic"><span id="estado-send">Send</span></button>
     </div>
     <h2>Text to Speech AI</h2>
     <p>Fill in the text field and listen to the result.</p>
 
     <div class="voice-container">
-        <textarea id="texto-resultado" placeholder="Fill in the text field here to hear the result..." rows="8" cols="128"></textarea>
+        <textarea id="outputResponse" placeholder="Fill in the text field here to hear the result..." rows="8" cols="128"></textarea>
     </div>

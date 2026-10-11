@@ -9,5 +9,6 @@ const apiController = new ApiController();
 
 // List of AJAX requests, all starting with /api
 router.get('/users', (req, res) => apiController.getUsers(req, res));
+router.post('/reproduce', (req, res) => apiController.reproduce(req, res));
 
 module.exports = router;

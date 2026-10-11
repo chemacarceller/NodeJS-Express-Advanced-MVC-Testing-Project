@@ -1,6 +1,8 @@
 // Import Express.js, the most popular web framework for Node.js.
 const express = require('express');
 
+const cors = require('cors');
+
 // Imports a plugin for the EJS template engine.
 // Its main function is to allow you to use a common base layout
 // as a template that already includes the navigation menu and footer,
@@ -13,7 +15,15 @@ const path = require('path');
 
 // creates an instance of the Express application and stores it in the variable named `app`.
 const app = express();
+app.use(express.json());
 app.locals.title = 'My Testing Web Site'; 
+
+
+app.use(cors({
+    origin: 'http://localhost:4000',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // EJS template engine configuration
 app.set('view engine', 'ejs');
