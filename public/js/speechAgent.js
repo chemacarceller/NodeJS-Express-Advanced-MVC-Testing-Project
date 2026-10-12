@@ -1,3 +1,5 @@
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+
 export default class SpeechAgent {
 
     constructor() {
@@ -9,13 +11,28 @@ export default class SpeechAgent {
         
         this.messageQueue = [];
         this.speaking = false;
+        this.hearing = false;
+
+        this.recognition = null;
+
+        this.isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+
+        if (!SpeechRecognition) {
+            console.error("Este navegador no soporta SpeechRecognition.");
+            return;
+        } else {
+            this.recognition = new SpeechRecognition();
+            this.recognition.lang = 'es-ES';
+            this.recognition.continuous = true;
+            this.recognition.interimResults = true;
+        }
 
         this._initVoices();
     }
 
     _initVoices(favouriteVoice='') {
 
-        const loadVoice = () => {
+        const loadVoice = (favouriteVoice='') => {
 
             const voices = window.speechSynthesis.getVoices();
             const voicesInSpanish = voices.filter(v => v.lang.includes('es'));
@@ -45,6 +62,7 @@ export default class SpeechAgent {
     }
 
     _processQueue() {
+
         if (this.messageQueue.length === 0) {
             this.speaking = false;
             return;
@@ -63,5 +81,57 @@ export default class SpeechAgent {
         reading.onerror = () => this._processQueue();
 
         window.speechSynthesis.speak(reading);
+    }
+
+    async hear() {
+
+        let fixedText = "";
+
+        if (!this.hearing) {
+            fixedText = inputMessage.value;
+            this.recognition.start();
+        } else this.recognition.stop();
+
+        this.recognition.onstart = () => {
+            this.hearing = true;
+            btnVoice.textContent = "Stop Dictation";
+            btnVoice.classList.add('hearing');
+        };
+
+        this.recognition.onend = () => {
+            this.hearing = false;
+            btnVoice.textContent = "Start Dictation";
+            btnVoice.classList.remove('hearing');    
+        };
+
+        this.recognition.onresult = (event) => {
+
+            let provisionaltext = "";
+
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+        
+                if (!event.results[i] || !event.results[i][0] || typeof event.results[i][0].transcript === 'undefined') continue;
+
+                let transcription = event.results[i][0].transcript.trim().toLowerCase();
+
+                if (transcription === "borrar todo") {
+                    fixedText = "";
+                    inputMessage.value = "";
+                    return;
+                }
+
+                if (event.results[i].isFinal) {
+                    if (transcription === "punto y aparte") {
+                        fixedText += ".\n\n";
+                    } else {
+                        fixedText += event.results[i][0].transcript + " ";
+                    }
+                } else {
+                    if (transcription !== "punto y aparte" && transcription !== "borrar todo") provisionaltext += event.results[i][0].transcript;
+                }
+            }
+            inputMessage.value = fixedText + provisionaltext;
+            inputMessage.scrollTop = inputMessage.scrollHeight;
+        };
     }
 }

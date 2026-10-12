@@ -5,9 +5,9 @@ console.log("Testing speechAI.js..." + Math.floor(Math.random() * 100000));
 console.log("=> speechAI.js... speechAID = " + sessionStorage.getItem('speechAID'));
 
 const inputMessage = document.getElementById('inputMessage');
+const btnVoice = document.getElementById('btnVoice');
 const btnSend = document.getElementById('btnSend');
 const outputResponse = document.getElementById('outputResponse');
-
 
 const iAgent = new IAgent();
 const eventoInput = new Event('input', { bubbles: true });
@@ -67,4 +67,8 @@ outputResponse.addEventListener('input', (e) => {
 // If the user deletes text manually, we reset the read pointer.
 outputResponse.addEventListener('keydown', (e) => {
   if (e.key === 'Backspace' || e.key === 'Delete') setTimeout(() => { lastReadPosition = outputResponse.value.length; }, 10);
+});
+
+btnVoice.addEventListener('click', () => {
+  speechAgent.hear();
 });

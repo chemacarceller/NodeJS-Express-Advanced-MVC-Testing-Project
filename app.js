@@ -40,6 +40,8 @@ app.set("layout extractStyles", true);
 // Serve static files (CSS, images, client-side JS) from the 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+
 // Loads and connects the main router (route aggregator from the routes folder)
 // The home route is managed via an WebRoutes.js file located within ./routes
 const WebRoutes = require('./routes/WebRoutes');
