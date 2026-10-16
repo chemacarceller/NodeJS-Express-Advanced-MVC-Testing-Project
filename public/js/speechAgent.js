@@ -1,5 +1,8 @@
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
 
+
+const eventClick = new Event('click', { bubbles: true });
+
 export default class SpeechAgent {
 
     constructor() {
@@ -18,7 +21,7 @@ export default class SpeechAgent {
         this.isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
 
         if (!SpeechRecognition) {
-            console.error("Este navegador no soporta SpeechRecognition.");
+            console.error("This browser does not support SpeechRecognition.");
             return;
         } else {
             this.recognition = new SpeechRecognition();
@@ -83,6 +86,8 @@ export default class SpeechAgent {
         window.speechSynthesis.speak(reading);
     }
 
+    stopHearing() { if (this.recognition) this.recognition.stop(); }
+
     async hear() {
 
         let fixedText = "";
@@ -107,8 +112,9 @@ export default class SpeechAgent {
         this.recognition.onresult = (event) => {
 
             let provisionaltext = "";
+            let currentFixedText = "";
 
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
+            for (let i = 0; i < event.results.length; ++i) {
         
                 if (!event.results[i] || !event.results[i][0] || typeof event.results[i][0].transcript === 'undefined') continue;
 
@@ -117,19 +123,34 @@ export default class SpeechAgent {
                 if (transcription === "borrar todo") {
                     fixedText = "";
                     inputMessage.value = "";
+                    this.recognition.abort(); 
+                    setTimeout(() => {
+                        this.hearing = true;
+                        this.recognition.start();
+                    }, 100);
                     return;
                 }
 
+                transcription = event.results[i][0].transcript.toLowerCase().trim();
+
                 if (event.results[i].isFinal) {
-                    if (transcription === "punto y aparte") {
-                        fixedText += ".\n\n";
+                    if (transcription.includes("punto y final")) {
+                        this.stopHearing();
+                        btnSend.dispatchEvent(eventClick);                        
+                    } else if (transcription.includes("punto y aparte")) {
+                        const textBeforeCommand = event.results[i][0].transcript.replace(/punto y aparte/i, '').trim();
+                        currentFixedText += (textBeforeCommand ? textBeforeCommand + " " : "") + ".\n";
+                        fixedText += (textBeforeCommand ? textBeforeCommand + " " : "") + ".\n";
                     } else {
-                        fixedText += event.results[i][0].transcript + " ";
+                        currentFixedText += event.results[i][0].transcript + " ";
                     }
                 } else {
-                    if (transcription !== "punto y aparte" && transcription !== "borrar todo") provisionaltext += event.results[i][0].transcript;
+                    if (!transcription.includes("punto y aparte") && !transcription.includes("borrar todo")) {
+                        provisionaltext += event.results[i][0].transcript;
+                    }
                 }
             }
+            fixedText = currentFixedText;
             inputMessage.value = fixedText + provisionaltext;
             inputMessage.scrollTop = inputMessage.scrollHeight;
         };

@@ -1,25 +1,27 @@
+const URL_PROXY = `${window.location.origin}/api/client`;
+
 export default class IAgent {
 
     constructor() {
-
     }
 
     async initializeAgent() {
 
         try {
     
-            const answer = await fetch('http://localhost:4500/api/init-agent', {
+            const answer = await fetch(`${URL_PROXY}/init-agent`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    sessionId : sessionStorage.getItem('speechAID'),
-                    mode : 'NormalDB'
-                })
+                body: JSON.stringify({mode : 'NormalDB'})
             });
 
             const data = await answer.json();
+
+            sessionStorage.setItem('speechAID', data.sessionId);
+        
+            return data.sessionId;
 
         } catch (error) {      
             console.error('Error initializing:', error);
@@ -37,7 +39,7 @@ export default class IAgent {
 
             inputMessage.disabled = true; 
 
-            const response = await fetch('http://localhost:4500/api/send-message', {
+            const response = await fetch(`${URL_PROXY}/send-message`, {
 
                 method: 'POST',
                 headers: {

@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 // Import Express.js, the most popular web framework for Node.js.
 const express = require('express');
 
@@ -25,6 +27,8 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+app.use(express.urlencoded({ extended: true }));
+
 // EJS template engine configuration
 app.set('view engine', 'ejs');
 
@@ -39,6 +43,8 @@ app.set("layout extractStyles", true);
 
 // Serve static files (CSS, images, client-side JS) from the 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 
 
