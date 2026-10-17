@@ -1,13 +1,14 @@
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
 
-
 const eventClick = new Event('click', { bubbles: true });
+const agentState = { hearing: false };
+const hearEvent = new CustomEvent("hearEvent", { detail: agentState, bubbles: true });
 
 export default class SpeechAgent {
 
-    constructor() {
+    constructor({inputLanguage='es-Es', outputLanguage='es-Es'} = {}) {
   
-        this.lang = 'es-ES';
+        this.lang = outputLanguage;
         this.rate = 1;
         this.pitch = 1;
         this.voice = null;
@@ -25,28 +26,29 @@ export default class SpeechAgent {
             return;
         } else {
             this.recognition = new SpeechRecognition();
-            this.recognition.lang = 'es-ES';
+            this.recognition.lang = inputLanguage;
             this.recognition.continuous = true;
             this.recognition.interimResults = true;
         }
 
-        this._initVoices();
+        this.#initVoices('es');
     }
 
-    _initVoices(favouriteVoice='') {
+    #initVoices(language, favouriteVoice='') {
 
-        const loadVoice = (favouriteVoice='') => {
+        const loadVoice = () => {
 
             const voices = window.speechSynthesis.getVoices();
-            const voicesInSpanish = voices.filter(v => v.lang.includes('es'));
+            const voicesInLanguage = voices.filter(v => v.lang.includes(language));
 
-            if (voicesInSpanish.length > 0) {
-                const favorite = voicesInSpanish.find(v => v.name.includes(favouriteVoice));
-                this.voice = favorite || voicesInSpanish[0];
+            if (voicesInLanguage.length > 0) {
+                const favorite = voicesInLanguage.find(v => v.name.includes(favouriteVoice));
+                this.voice = favorite || voicesInLanguage[0];
+            } else {
+                console.log("No entries have been found in the specified language:" + language);
+                return;
             }
         };
-
-        loadVoice();
 
         if (typeof window !== 'undefined' && window.speechSynthesis) {
             window.speechSynthesis.onvoiceschanged = loadVoice;
@@ -61,10 +63,10 @@ export default class SpeechAgent {
 
         this.messageQueue.push(cleanText);
         
-        if (!this.hablando) this._processQueue();
+        if (!this.speaking) this.#processQueue();
     }
 
-    _processQueue() {
+    #processQueue() {
 
         if (this.messageQueue.length === 0) {
             this.speaking = false;
@@ -80,15 +82,15 @@ export default class SpeechAgent {
         reading.pitch = this.pitch;
         if (this.voice) reading.voice = this.voice;
 
-        reading.onend = () => this._processQueue();
-        reading.onerror = () => this._processQueue();
+        reading.onend = () => this.#processQueue();
+        reading.onerror = () => this.#processQueue();
 
         window.speechSynthesis.speak(reading);
     }
 
     stopHearing() { if (this.recognition) this.recognition.stop(); }
 
-    async hear() {
+    async hear(inputMessage) {
 
         let fixedText = "";
 
@@ -99,14 +101,14 @@ export default class SpeechAgent {
 
         this.recognition.onstart = () => {
             this.hearing = true;
-            btnVoice.textContent = "Stop Dictation";
-            btnVoice.classList.add('hearing');
+            agentState.hearing = true;
+            window.dispatchEvent(hearEvent); 
         };
 
         this.recognition.onend = () => {
             this.hearing = false;
-            btnVoice.textContent = "Start Dictation";
-            btnVoice.classList.remove('hearing');    
+            agentState.hearing = false;
+            window.dispatchEvent(hearEvent); 
         };
 
         this.recognition.onresult = (event) => {
@@ -135,8 +137,13 @@ export default class SpeechAgent {
 
                 if (event.results[i].isFinal) {
                     if (transcription.includes("punto y final")) {
+                        const cleanText = event.results[i][0].transcript.replace(/punto y final/i, '').trim();
+                        if (cleanText) currentFixedText += cleanText + ". ";
+                        fixedText = currentFixedText;
+                        inputMessage.value = fixedText;
                         this.stopHearing();
                         btnSend.dispatchEvent(eventClick);                        
+                        return;
                     } else if (transcription.includes("punto y aparte")) {
                         const textBeforeCommand = event.results[i][0].transcript.replace(/punto y aparte/i, '').trim();
                         currentFixedText += (textBeforeCommand ? textBeforeCommand + " " : "") + ".\n";

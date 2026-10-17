@@ -12,6 +12,9 @@ router.use('/users', usersRouter);
 const speechAIRouter = require('./SpeechAIRoute');
 router.use('/speechAI', speechAIRouter); 
 
+const translatorAIRouter = require('./TranslatorAIRoute');
+router.use('/translatorAI', translatorAIRouter); 
+
 // The home route is handled via indexController.start
 const homeController = new HomeController();
 router.get('/', homeController.start); 

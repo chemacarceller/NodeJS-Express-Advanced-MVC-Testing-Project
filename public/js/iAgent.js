@@ -5,7 +5,7 @@ export default class IAgent {
     constructor() {
     }
 
-    async initializeAgent() {
+    async initializeAgent(key, mode) {
 
         try {
     
@@ -14,12 +14,12 @@ export default class IAgent {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({mode : 'NormalDB'})
+                body: JSON.stringify({mode : mode})
             });
 
             const data = await answer.json();
 
-            sessionStorage.setItem('speechAID', data.sessionId);
+            sessionStorage.setItem(key, data.sessionId);
         
             return data.sessionId;
 

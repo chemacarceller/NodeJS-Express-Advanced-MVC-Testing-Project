@@ -2,26 +2,35 @@ import  IAgent from './iAgent.js';
 import  SpeechAgent from './speechAgent.js';
 
 const iAgent = new IAgent();
+const speechAgent = new SpeechAgent();   
+
+const inputMessage = document.getElementById('inputMessage');
+const btnVoice = document.getElementById('btnVoice');
+const btnSend = document.getElementById('btnSend');
+const outputResponse = document.getElementById('outputResponse');
+const text2Voice = document.getElementById('Text2Voice');
+const eventInput = new Event('input', { bubbles: true });
 
 async function init() {
   let speechAID = sessionStorage.getItem('speechAID');
-  if (!speechAID) speechAID = await iAgent.initializeAgent(); 
+  if (!speechAID) speechAID = await iAgent.initializeAgent('speechAID','NormalDB'); 
   console.log("=> speechAI.js... speechAID = " + speechAID);
 }
+
+window.addEventListener("hearEvent", (e) => {
+    if (!btnVoice) return; 
+    if (e.detail.hearing) {
+      btnVoice.textContent = "Stop Dictation";
+      btnVoice.classList.add('hearing');
+    } else {
+      btnVoice.textContent = "Start Dictation";
+      btnVoice.classList.remove('hearing');    
+    }
+});
 
 document.addEventListener('DOMContentLoaded', () => {
 
   init();
-
-  const inputMessage = document.getElementById('inputMessage');
-  const btnVoice = document.getElementById('btnVoice');
-  const btnSend = document.getElementById('btnSend');
-  const outputResponse = document.getElementById('outputResponse');
-  const text2Voice = document.getElementById('Text2Voice');
-  const eventInput = new Event('input', { bubbles: true });
-
-
-  const speechAgent = new SpeechAgent();   
 
   // I click the submit button
   btnSend.addEventListener('click', async () => {
@@ -77,8 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Backspace' || e.key === 'Delete') setTimeout(() => { lastReadPosition = outputResponse.value.length; }, 10);
   });
 
-  btnVoice.addEventListener('click', () => {
-    speechAgent.hear();
-  });
+  btnVoice.addEventListener('click', () => speechAgent.hear(inputMessage) );
 
 });

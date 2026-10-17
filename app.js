@@ -1,8 +1,10 @@
+// Loads environment variables from a secret file named .env into the Node.js process.env object
 require('dotenv').config();
 
 // Import Express.js, the most popular web framework for Node.js.
 const express = require('express');
 
+// Import the `cors` package, which is a middleware for Express used to enable and configure CORS (Cross-Origin Resource Sharing).
 const cors = require('cors');
 
 // Imports a plugin for the EJS template engine.
@@ -17,17 +19,7 @@ const path = require('path');
 
 // creates an instance of the Express application and stores it in the variable named `app`.
 const app = express();
-app.use(express.json());
-app.locals.title = 'My Testing Web Site'; 
-
-
-app.use(cors({
-    origin: 'http://localhost:4000',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
-app.use(express.urlencoded({ extended: true }));
+app.locals.title = 'My Testing Web Site';
 
 // EJS template engine configuration
 app.set('view engine', 'ejs');
@@ -35,31 +27,13 @@ app.set('view engine', 'ejs');
 // Change EJS template path
 app.set('views', path.join(__dirname, 'MVC', 'views'));
 
-// We enable the template system (Layouts) to have a common base design.
-app.use(expressLayouts); 
-
 // Extract the <style> and <link> elements from the child views to place them in the <head> of the global layout
 app.set("layout extractStyles", true); 
 
-// Serve static files (CSS, images, client-side JS) from the 'public' folder
-app.use(express.static(path.join(__dirname, 'public')));
 
+
+// It serves to efficiently silence the automatic requests that web browsers make when looking for your website's icon (the favicon).
 app.get('/favicon.ico', (req, res) => res.status(204).end());
-
-
-
-// Loads and connects the main router (route aggregator from the routes folder)
-// The home route is managed via an WebRoutes.js file located within ./routes
-const WebRoutes = require('./routes/WebRoutes');
-app.use('/', WebRoutes);
-
-// The AJAX routes (classes that return res.json) managed via an ApiRoyes.js file located within ./routes
-const ApiRoutes = require('./routes/ApiRoutes');
-app.use('/api', ApiRoutes); 
-
-
-
-
 
 
 
@@ -69,6 +43,34 @@ app.get('/forzar-error', (req, res, next) => {
 });
 
 
+
+// It is an Express middleware that allows your server to understand and process data received in JSON format.
+app.use(express.json());
+
+// This configuration restricts and protects your API, allowing ONLY a specific application (running at http://localhost:4000) to communicate with your server.
+app.use(cors({
+    origin: 'http://localhost:4000',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// It is an Express middleware that allows your server to understand and process data sent from native HTML forms.
+app.use(express.urlencoded({ extended: true }));
+
+// Serve static files (CSS, images, client-side JS) from the 'public' folder
+app.use(express.static(path.join(__dirname, 'public')));
+
+// We enable the template system (Layouts) to have a common base design.
+app.use(expressLayouts); 
+
+// Loads and connects the main router (route aggregator from the routes folder)
+// The home route is managed via an WebRoutes.js file located within ./routes
+const WebRoutes = require('./routes/WebRoutes');
+app.use('/', WebRoutes);
+
+// The AJAX routes (classes that return res.json) managed via an ApiRoyes.js file located within ./routes
+const ApiRoutes = require('./routes/ApiRoutes');
+app.use('/api', ApiRoutes); 
 
 
 

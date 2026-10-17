@@ -1,6 +1,5 @@
 const HomeService = require('../services/homeService');
 
-
 class HomeController {
 
   constructor() {
