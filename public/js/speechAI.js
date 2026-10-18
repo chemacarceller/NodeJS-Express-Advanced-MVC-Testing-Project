@@ -9,24 +9,14 @@ const btnVoice = document.getElementById('btnVoice');
 const btnSend = document.getElementById('btnSend');
 const outputResponse = document.getElementById('outputResponse');
 const text2Voice = document.getElementById('Text2Voice');
-const eventInput = new Event('input', { bubbles: true });
+
+const inputEvent = new Event('input', { bubbles: true });
 
 async function init() {
   let speechAID = sessionStorage.getItem('speechAID');
   if (!speechAID) speechAID = await iAgent.initializeAgent('speechAID','NormalDB'); 
   console.log("=> speechAI.js... speechAID = " + speechAID);
 }
-
-window.addEventListener("hearEvent", (e) => {
-    if (!btnVoice) return; 
-    if (e.detail.hearing) {
-      btnVoice.textContent = "Stop Dictation";
-      btnVoice.classList.add('hearing');
-    } else {
-      btnVoice.textContent = "Start Dictation";
-      btnVoice.classList.remove('hearing');    
-    }
-});
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -38,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     speechAgent.stopHearing();
 
     outputResponse.value = '';
-    outputResponse.dispatchEvent(eventInput);
+    outputResponse.dispatchEvent(inputEvent);
 
     const message = inputMessage.value.trim();
   
@@ -49,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
     outputResponse.value = await iAgent.sendMessageToChat(sessionStorage.getItem('speechAID'), message);
     outputResponse.value += " ";
-    outputResponse.dispatchEvent(eventInput);
+    outputResponse.dispatchEvent(inputEvent);
 
   });
 
@@ -86,6 +76,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Backspace' || e.key === 'Delete') setTimeout(() => { lastReadPosition = outputResponse.value.length; }, 10);
   });
 
-  btnVoice.addEventListener('click', () => speechAgent.hear(inputMessage) );
+  btnVoice.addEventListener('click', () => speechAgent.hear(onReturnText, onStateChange, onFinish));
+
+  const onReturnText = text => {
+    inputMessage.value = text;
+    inputMessage.scrollTop = inputMessage.scrollHeight;
+  }
+
+  const onStateChange = hearing => {
+    if (!btnVoice) return; 
+    if (hearing) {
+      btnVoice.textContent = "Stop Dictation";
+      btnVoice.classList.add('hearing');
+    } else {
+      btnVoice.textContent = "Start Dictation";
+      btnVoice.classList.remove('hearing');    
+    }
+  }
+
+  const onFinish = () => btnSend.click();
 
 });

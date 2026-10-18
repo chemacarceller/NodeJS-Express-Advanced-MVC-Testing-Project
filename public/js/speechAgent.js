@@ -1,13 +1,13 @@
+// Ensures code compatibility across different web browsers.
+// The SpeechRecognition object is the engine or "factory" that handles the entire process of listening to the user and converting their voice into text in JavaScript
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
 
-const eventClick = new Event('click', { bubbles: true });
-const agentState = { hearing: false };
-const hearEvent = new CustomEvent("hearEvent", { detail: agentState, bubbles: true });
-
+// Exported class
 export default class SpeechAgent {
 
-    constructor({inputLanguage='es-Es', outputLanguage='es-Es'} = {}) {
-  
+    // The language used for listening to and reproducing texts is passed to the constructor
+    constructor({inputLanguage='es-Es', outputLanguage='es-Es'} = {}) {  
+
         this.lang = outputLanguage;
         this.rate = 1;
         this.pitch = 1;
@@ -31,10 +31,19 @@ export default class SpeechAgent {
             this.recognition.interimResults = true;
         }
 
-        this.#initVoices('es');
+        if (typeof window !== 'undefined') this.setVoice('es');
     }
 
-    #initVoices(language, favouriteVoice='') {
+    // Method called to change the voice recognition language
+    setRecognitionLanguage = (language = 'es-ES') => this.recognition.lang = language;
+
+    // Method called to change the voice reproduction language
+    setVoice(language='es-Es', favouriteVoice='') {
+
+        if (typeof window === 'undefined' || !window.speechSynthesis) {
+            console.warn("SpeechSynthesis is not supported in this environment");
+            return;
+        }
 
         const loadVoice = () => {
 
@@ -50,12 +59,14 @@ export default class SpeechAgent {
             }
         };
 
+        loadVoice()
+
         if (typeof window !== 'undefined' && window.speechSynthesis) {
             window.speechSynthesis.onvoiceschanged = loadVoice;
         }
     }
 
-
+    // Method called to reproduce a text
     speak(text) {
         
         const cleanText = text.replace(/\./g, '');
@@ -66,6 +77,7 @@ export default class SpeechAgent {
         if (!this.speaking) this.#processQueue();
     }
 
+    // Private helping method for reproducing a text
     #processQueue() {
 
         if (this.messageQueue.length === 0) {
@@ -88,27 +100,27 @@ export default class SpeechAgent {
         window.speechSynthesis.speak(reading);
     }
 
+    // Method used to stop the voice recognition process
     stopHearing() { if (this.recognition) this.recognition.stop(); }
 
-    async hear(inputMessage) {
+    // Method to handle the voice recognition process
+    async hear(onReturnText, onStateChange, onFinish) {
 
         let fixedText = "";
 
         if (!this.hearing) {
-            fixedText = inputMessage.value;
+            onReturnText(fixedText);
             this.recognition.start();
         } else this.recognition.stop();
 
         this.recognition.onstart = () => {
             this.hearing = true;
-            agentState.hearing = true;
-            window.dispatchEvent(hearEvent); 
+            onStateChange(this.hearing);
         };
 
         this.recognition.onend = () => {
             this.hearing = false;
-            agentState.hearing = false;
-            window.dispatchEvent(hearEvent); 
+            onStateChange(this.hearing);
         };
 
         this.recognition.onresult = (event) => {
@@ -124,7 +136,7 @@ export default class SpeechAgent {
 
                 if (transcription === "borrar todo") {
                     fixedText = "";
-                    inputMessage.value = "";
+                    onReturnText("");
                     this.recognition.abort(); 
                     setTimeout(() => {
                         this.hearing = true;
@@ -140,9 +152,9 @@ export default class SpeechAgent {
                         const cleanText = event.results[i][0].transcript.replace(/punto y final/i, '').trim();
                         if (cleanText) currentFixedText += cleanText + ". ";
                         fixedText = currentFixedText;
-                        inputMessage.value = fixedText;
+                        onReturnText(fixedText);
                         this.stopHearing();
-                        btnSend.dispatchEvent(eventClick);                        
+                        onFinish();
                         return;
                     } else if (transcription.includes("punto y aparte")) {
                         const textBeforeCommand = event.results[i][0].transcript.replace(/punto y aparte/i, '').trim();
@@ -158,8 +170,7 @@ export default class SpeechAgent {
                 }
             }
             fixedText = currentFixedText;
-            inputMessage.value = fixedText + provisionaltext;
-            inputMessage.scrollTop = inputMessage.scrollHeight;
+            onReturnText(fixedText + provisionaltext);
         };
     }
 }
