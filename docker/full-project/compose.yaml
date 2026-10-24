@@ -1,0 +1,7 @@
+services: 
+  amvc:
+    build:
+      context: ../..
+      dockerfile: docker/full-project/Dockerfile
+    ports:
+      - "4501:4501"

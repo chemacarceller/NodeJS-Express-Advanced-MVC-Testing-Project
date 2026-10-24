@@ -4,3 +4,26 @@
 <%- contentFor('body') %>
 
     <h2>Translator AI</h2>
+    <p>Press the button to start speaking and fill in the text field.</p>
+    <p>Select the language in which you want to speak : 
+    <select id="InputLanguageSelector" disabled>
+        <option value="es-ES">Spanish</option>
+    </select></p>
+    <div class="voice-container">
+        <textarea id="inputMessage" placeholder="Your dictated text will appear here..." rows="8" cols="128"></textarea>&nbsp;
+        <button id="btnVoice" class="btn-mic"><span id="estado-mic">Start Dictation</span></button>&nbsp;&nbsp;&nbsp;
+        <button id="btnSend" class="btn-mic"><span id="estado-send">Translate</span></button>
+    </div>
+    <h2>Text to Speech AI</h2>
+    <p>Select the language you would like it translated into :
+    <select id="OutputLanguageSelector">
+        <option value="en-EN">English</option>
+        <option value="fr-FR">French</option>
+        <option value="de-DE">German</option>
+        <option value="es-ES">Spanish</option>
+    </select></p>
+    <p>Text To Voice Enabled : <input id="Text2Voice" type="checkbox" /></p>
+    <p>Once the text in this field is filled listen to the result if the Text To Voice Enabled checkbox is set</p>
+    <div class="voice-container">
+        <textarea id="outputResponse" disabled placeholder="Once the text in this field is filled listen to the result if the Text To Voice Enabled checkbox is set" rows="8" cols="128"></textarea>
+    </div>

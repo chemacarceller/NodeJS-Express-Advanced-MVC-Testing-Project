@@ -7,12 +7,6 @@ const express = require('express');
 // Import the `cors` package, which is a middleware for Express used to enable and configure CORS (Cross-Origin Resource Sharing).
 const cors = require('cors');
 
-// Imports a plugin for the EJS template engine.
-// Its main function is to allow you to use a common base layout
-// as a template that already includes the navigation menu and footer,
-// so you don't have to repeat that same HTML code on every page of your site.
-const expressLayouts = require('express-ejs-layouts');
-
 // Import the native Node.js 'path' module, which contains tools for managing, combining, 
 // and manipulating file and folder paths.
 const path = require('path');
@@ -20,6 +14,12 @@ const path = require('path');
 // creates an instance of the Express application and stores it in the variable named `app`.
 const app = express();
 app.locals.title = 'My Testing Web Site';
+
+// Imports a plugin for the EJS template engine.
+// Its main function is to allow you to use a common base layout
+// as a template that already includes the navigation menu and footer,
+// so you don't have to repeat that same HTML code on every page of your site.
+const expressLayouts = require('express-ejs-layouts');
 
 // EJS template engine configuration
 app.set('view engine', 'ejs');
@@ -30,26 +30,18 @@ app.set('views', path.join(__dirname, 'MVC', 'views'));
 // Extract the <style> and <link> elements from the child views to place them in the <head> of the global layout
 app.set("layout extractStyles", true); 
 
-
-
-// It serves to efficiently silence the automatic requests that web browsers make when looking for your website's icon (the favicon).
-app.get('/favicon.ico', (req, res) => res.status(204).end());
-
-
-
-// Temporary route to test the 500 error
-app.get('/forzar-error', (req, res, next) => {
-    throw new Error('Oops! This is an error triggered for testing purposes.');
-});
-
+app.set('view cache', false);
 
 
 // It is an Express middleware that allows your server to understand and process data received in JSON format.
 app.use(express.json());
 
-// This configuration restricts and protects your API, allowing ONLY a specific application (running at http://localhost:4000) to communicate with your server.
+const THIS_HOST = process.env.THIS_HOST || '127.0.0.1';
+const THIS_PORT = process.env.THIS_PORT || '4501';
+const THIS_URL = `http://${THIS_HOST}:${THIS_PORT}`; 
+
 app.use(cors({
-    origin: 'http://localhost:4000',
+    origin: ['http://localhost:4501', `${THIS_URL}`],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -73,6 +65,15 @@ const ApiRoutes = require('./routes/ApiRoutes');
 app.use('/api', ApiRoutes); 
 
 
+// It serves to efficiently silence the automatic requests that web browsers make when looking for your website's icon (the favicon).
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
+// Temporary route to force the 500 error
+app.get('/force-error', (req, res, next) => {
+    const finalMessage = req.query.msg ? decodeURIComponent(req.query.msg) : 'Oops! This is an error triggered for testing purposes.';
+    return next(new Error(finalMessage));
+});
+
 
 
 
@@ -87,7 +88,7 @@ app.use((req, res, next) => {
     const errorCode = 404;
     res.status(404).render('error', {
         title: `Error ${errorCode}`,
-        errorCodecode: 404,
+        errorCode : 404,
         message: "We're sorry, the page you are looking for does not exist."
     });
 });
@@ -100,11 +101,11 @@ app.use((req, res, next) => {
 // Express will ignore all normal middlewares (including 404)
 app.use((err, req, res, next) => {
     const errorCode = 500;
-    console.error(err.stack); 
     res.status(500).render('error', {
         title: `Error ${errorCode}`,
-        errorCodecode: errorCode,
-        message: err.message || 'There was an internal server problem. Please try again later.'
+        errorCode: errorCode,
+        message: err.message || 'There was an internal server problem. Please try again later',
+        layout: 'layout' 
     });
 });
 

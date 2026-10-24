@@ -13,5 +13,7 @@ router.post('/reproduce', (req, res) => apiController.reproduce(req, res));
 
 router.post('/client/init-agent', (req, res) => apiController.initAgent(req, res));
 router.post('/client/send-message', (req, res) => apiController.sendMessage(req, res));
+router.post('/client/create-custom-model', (req, res) => apiController.createCustomModel(req, res));
+router.post('/client/fix-model-system', (req, res) => apiController.fixModelSystem(req, res));
 
 module.exports = router;
