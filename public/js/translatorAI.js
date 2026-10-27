@@ -21,7 +21,6 @@ const inputEvent = new Event('input', { bubbles: true });
 async function init() {
 
 // Definition of constants for custom models
-
 const from = '';
 
 const system = `You are a strict, high-precision machine translation engine. Your sole function is to translate the provided text into the requested target language.
@@ -42,20 +41,50 @@ const parameters = {
 
   // If we haven't obtained the conversation ID, it means this is the first time we've entered the session.
   // We obtain it by calling the initializeAgent() method.
-  if (!translatorAID) translatorAID = await iAgent.initializeAgent('translatorAID', 'SimpleDB');
-  await iAgent.fixModelSystem(sessionId, system, parameters);
+  if (!translatorAID) translatorAID = await iAgent.initAgent('translatorAID', 'SimpleDB');
+  await iAgent.fixModelSystem(translatorAID, system, parameters);
 
   // We display the conversation ID in the console
   console.log("=> translatorAI.js... translatorAID = " + translatorAID);
+
+  const sessionExpiredTimeoutTranslatorAI = setInterval(async () => {
+    try {
+
+        const response = await fetch('/api/client/expired-session-consult',{
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId : translatorAID })
+        });
+
+        const data = await response.json();
+
+        // Final part: Here, any potential error is received and passed to the catch block
+        if (!response.ok) {
+          throw new Error(data.error + " : " + data.details)
+        }
+
+        // If no error has occurred, check the response status to determine whether or not the session has expired.
+        // Unlike cases where an error occurs—in which the error is provided via `data.error` and `data.details`—here, the message is provided via `data.msg`.
+        if (data.status === 'expired') {
+            clearInterval(sessionExpiredTimeoutTranslatorAI);
+            sessionStorage.clear();
+            window.location.href = `/force-error?msg=${encodeURIComponent(data.msg)}`;
+        }
+    } catch (error) {
+        window.location.href = `/force-error?msg=${encodeURIComponent(error.message)}`;
+    }
+  }, 4000);
+
 }
 
 
+document.addEventListener('DOMContentLoaded', async () => {
 
-document.addEventListener('DOMContentLoaded', () => {
-
-  // When the page loads, we execute init()
-  init();
-
+  // We do not enable the buttons until the init() method has been executed.
+  btnSend.disabled = true; btnVoice.disabled = true;
+  try { await init(); }
+  catch (error) { }
+  btnSend.disabled = false; btnVoice.disabled = false;
 
   // Event capture ...
   // I click the submit button
@@ -96,7 +125,7 @@ TRANSLATION:`;
 
     // We make the request by sending the message, receive the response, and add a space to it 
     // so that it can be played back up to the very last word, and trigger the input event on that text box
-    outputResponse.value = await iAgent.sendMessageToChat(sessionStorage.getItem('translatorAID'), message, 'generate', promptWrapper);
+    outputResponse.value = await iAgent.sendMessage(sessionStorage.getItem('translatorAID'), message, 'generate', promptWrapper);
     outputResponse.value += " ";
     outputResponse.dispatchEvent(inputEvent);
 

@@ -23,16 +23,47 @@ async function init() {
 
   // If we haven't obtained the conversation ID, it means this is the first time we've entered the session.
   // We obtain it by calling the initializeAgent() method.
-  if (!speechAID) speechAID = await iAgent.initializeAgent('speechAID','NormalDB'); 
+  if (!speechAID) speechAID = await iAgent.initAgent('speechAID','NormalDB'); 
 
   // We display the conversation ID in the console
   console.log("=> speechAI.js... speechAID = " + speechAID);
+
+  const sessionExpiredTimeoutSpeechAI = setInterval(async () => {
+    try {
+
+        const response = await fetch('/api/client/expired-session-consult',{
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId : speechAID })
+        });
+
+        const data = await response.json();
+
+        // Final part: Here, any potential error is received and passed to the catch block
+        if (!response.ok) {
+          throw new Error(data.error + " : " + data.details)
+        }
+
+        // If no error has occurred, check the response status to determine whether or not the session has expired.
+        // Unlike cases where an error occurs—in which the error is provided via `data.error` and `data.details`—here, the message is provided via `data.msg`.
+        if (data.status === 'expired') {
+            clearInterval(sessionExpiredTimeoutSpeechAI);
+            sessionStorage.clear();
+            window.location.href = `/force-error?msg=${encodeURIComponent(data.msg)}`;
+        }
+    } catch (error) {
+      window.location.href = `/force-error?msg=${encodeURIComponent(error.message)}`;
+    }
+  }, 10000);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
 
-  // When the page loads, we execute init()
-  init();
+  // We do not enable the buttons until the init() method has been executed.
+  btnSend.disabled = true; btnVoice.disabled = true;
+  try { await init(); }
+  catch (error) { }
+  btnSend.disabled = false; btnVoice.disabled = false;
 
   // Event capture ...
   // I click the submit button
@@ -57,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // We make the request by sending the message, receive the response, and add a space to it 
     // so that it can be played back up to the very last word, and trigger the input event on that text box
-    outputResponse.value = await iAgent.sendMessageToChat(sessionStorage.getItem('speechAID'), message);
+    outputResponse.value = await iAgent.sendMessage(sessionStorage.getItem('speechAID'), message);
     outputResponse.value += " ";
     outputResponse.dispatchEvent(inputEvent);
 

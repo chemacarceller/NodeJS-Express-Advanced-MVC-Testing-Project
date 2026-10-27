@@ -6,7 +6,6 @@ const HOST_IAGENT = process.env.HOST_IAGENT || '127.0.0.1';
 const PORT_IAGENT = process.env.PORT_IAGENT || '4500';
 const PRIVATE_AGENT_URL = `http://${HOST_IAGENT}:${PORT_IAGENT}/api`; 
 
-
 // Controller class that handles all AJAX requests
 class ApiController {
 
@@ -52,45 +51,44 @@ class ApiController {
         res.json({ success: true, message: "Playing sound on the server" });
     }
 
+    
     async initAgent(req, res) {
     
         try {
 
             const { mode } = req.body;
 
-            // Secure UUID generation using the native Node.js module
-            const serverSessionId = crypto.randomUUID ? crypto.randomUUID() 
-                : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
             // We make the request to the intelligence agent service
             const response = await fetch(`${PRIVATE_AGENT_URL}/init-agent`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    sessionId: serverSessionId,
-                    mode: mode || 'NormalDB' 
+                body: JSON.stringify({
+                    mode: mode || 'NormalDB'
                 })
             });
 
-            // If the response is not successful, we throw an exception
-            if (!response.ok) {
-                const errorJson = await response.json();
-                throw errorJson;
-            }
+            const data = await response.json();
+
+            // If an error has occurred in the Intelligence Agent module, we forward it to the catch block
+            if (!response.ok) throw new Error(data);
     
             // Respond to the HTTP client to close the request
             return res.status(200).json({ 
                 success: true, 
                 message: 'Intelligence Agent sucessfully initialized',
-                sessionId: serverSessionId,
+                sessionId: data.sessionId,
                 status: response.status 
             });            
 
         } catch (error) {
+
+            // If an error occurs within the try block of this class or in the Intelligence Agent module
+            const realDetail = error.cause ? error.cause.message : error.message;
+
             return res.status(500).json({
                 success: false,
-                error: error.error || 'Error in Aplication initializing agent',
-                details: error.details || 'Remote Fetch Failed'
+                error: error.error || 'Error in the Agent API Controller Module Failed to initialize the agent',
+                details: error.details || `${realDetail}`
             });
         }
     }
@@ -109,11 +107,10 @@ class ApiController {
                 body: JSON.stringify({ sessionId, modelName, from, system, parameters })
             });
 
-            // If the response is not successful, we throw an exception
-            if (!response.ok) {
-                const errorJson = await response.json();
-                throw errorJson;
-            }
+            const data = await response.json();
+
+            // If an error has occurred in the Intelligence Agent module, we forward it to the catch block
+            if (!response.ok) throw new Error(data);
 
             // Respond to the HTTP client to close the request
             return res.status(200).json({ 
@@ -123,54 +120,19 @@ class ApiController {
             });
 
         } catch (error) {
+
+            // If an error occurs within the try block of this class or in the Intelligence Agent module
+            const realDetail = error.cause ? error.cause.message : error.message;
+
             return res.status(500).json({
                 success: false,
-                error: error.error || 'Error in Aplication creating custom model',
-                details: error.details || 'Remote Fetch Failed'
+                error: error.error || 'Error in the Agent API Controller Module Failed to create the custom model',
+                details: error.details || `${realDetail}`
             });
         }
 
     }
 
-    async sendMessage(req, res) {
-
-        try {
-
-            const { sessionId, message, type, promptWrapper, model } = req.body;
-
-            // We make the request to the intelligence agent service
-            const response = await fetch(`${PRIVATE_AGENT_URL}/send-message`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId, message, type, promptWrapper, model })
-            });
-
-            // If the response is not successful, we throw an exception
-             if (!response.ok) {
-                const errorJson = await response.json();
-                throw errorJson;
-            }
-
-            // Here we know that the request is successful, so we retrieve the data
-            const data = await response.json();
-
-            // Respond to the HTTP client to close the request
-            return res.status(200).json({ 
-                success: true, 
-                message: 'Message sent successfully',
-                answer: data.answer,
-                status: response.status 
-            });            
-
-        } catch (error) {
-            
-            return res.status(500).json({
-                success: false,
-                error: error.error || 'Error in Aplication sending message',
-                details: error.details || 'Remote Fetch Failed'
-            });
-        }
-    }
 
     async fixModelSystem(req, res) {
 
@@ -185,11 +147,10 @@ class ApiController {
                 body: JSON.stringify({ sessionId, system, parameters })
             });
 
-            // If the response is not successful, we throw an exception
-            if (!response.ok) {
-                const errorJson = await response.json();
-                throw errorJson;
-            }
+            const data = await response.json();
+
+            // If an error has occurred in the Intelligence Agent module, we forward it to the catch block
+            if (!response.ok) throw new Error(data);
 
             // Respond to the HTTP client to close the request
             return res.status(200).json({ 
@@ -200,10 +161,91 @@ class ApiController {
 
         } catch (error) {
 
+            // If an error occurs within the try block of this class or in the Intelligence Agent module
+            const realDetail = error.cause ? error.cause.message : error.message;
+
             return res.status(500).json({
                 success: false,
-                error: error.error || 'Error in Aplication fixing the model system',
-                details: error.details || 'Remote Fetch Failed'
+                error: error.error || 'Error in the Agent API Controller Module Failed to fix the model',
+                details: error.details || `${realDetail}`
+            });
+        }
+    }
+
+
+    async sendMessage(req, res) {
+
+        try {
+
+            const { sessionId, message, type, promptWrapper, model } = req.body;
+
+            // We make the request to the intelligence agent service
+            const response = await fetch(`${PRIVATE_AGENT_URL}/send-message`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId, message, type, promptWrapper, model })
+            });
+
+            const data = await response.json();
+
+            // If an error has occurred in the Intelligence Agent module, we forward it to the catch block
+            if (!response.ok) throw new Error(data);
+
+            // Respond to the HTTP client to close the request
+            return res.status(200).json({ 
+                success: true, 
+                message: 'Message sent successfully',
+                answer: data.answer,
+                status: response.status 
+            });            
+
+        } catch (error) {
+
+            // If an error occurs within the try block of this class or in the Intelligence Agent module
+            const realDetail = error.cause ? error.cause.message : error.message;
+
+            return res.status(500).json({
+                success: false,
+                error: error.error || 'Error in the Agent API Controller Module Failed to send the message',
+                details: error.details || `${realDetail}`
+            });
+        }
+    }
+
+    async expiredSessionConsult(req, res) {
+
+        try {
+
+            const { sessionId } = req.body;
+
+            // We make the request to the intelligence agent service
+            const response = await fetch(`${PRIVATE_AGENT_URL}/expired-session-consult`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId })
+            });
+
+            const data = await response.json();
+
+            // If an error has occurred in the Intelligence Agent module, we forward it to the catch block
+            if (!response.ok) throw new Error(data);
+
+            // Respond to the HTTP client to close the request
+            return res.status(200).json({ 
+                success: true, 
+                msg: data.msg,
+                status: data.status 
+            });
+
+        } catch (error) {
+
+            // If an error occurs within the try block of this class or in the Intelligence Agent module
+            const realDetail = error.cause ? error.cause.message : error.message;
+
+            return res.status(500).json({
+                success: false,
+                error: error.error || 'Error in the Agent API Controller Module during expired session consultation',
+                details: error.details || `${realDetail}`
             });
         }
     }
