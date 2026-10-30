@@ -6,11 +6,28 @@
 <% if (typeof style !== 'undefined' && style) { -%>
     <%- style %>
 <% } -%>
-        <script type="text/javascript" src="js/layout.js"></script>
+        <script type="text/javascript">
+
+            // If we have arrived here after reloading the page,
+            // sessionStorage is cleared before the page begins rendering or loading other scripts.
+            // provided that we have specified this in the F5_CLOSE_SESSION server variable
+            const [navigationEntry] = performance.getEntriesByType('navigation');
+            const isReloading = navigationEntry && navigationEntry.type === 'reload';
+            const f5CloseSession = <%= F5_CLOSE_SESSION %>;
+            if (isReloading && f5CloseSession) sessionStorage.clear();
+
+        // The process is as follows: a page reload is requested, and the `beforeunload` event is triggered to seek confirmation.
+        // If confirmed, the `pagehide` event is triggered, which initiates a session-close request, and the page reloads.
+        // Once the page reloads, this code executes—before any other scripts—and clears `sessionStorage`.
+        // In the case of internal navigation, I wouldn't clear the sessionStorage, and the script won't have requested a session termination from the server.
+        
+        </script>
+        <script type="module" src="js/layout.js"></script>
 <%- defineContent('scripts') %>
     </head>
     <body>
-        <nav><a href="/">Home</a>&nbsp;&nbsp;&nbsp;<a href="/users">Users</a>&nbsp;&nbsp;&nbsp;<a href="/speechAI">Speech-AI</a>&nbsp;&nbsp;&nbsp;<a href="/translatorAI">Translator-AI</a></nav>
+        <nav><a href="/">Home</a>&nbsp;&nbsp;&nbsp;<a href="/users">Users</a>&nbsp;&nbsp;&nbsp;<a href="/speechAI">Speech-AI</a>&nbsp;&nbsp;&nbsp;<a href="/translatorAI">Translator-AI</a>
+        &nbsp;&nbsp;&nbsp;<a href="/systemprompteditor">System Prompt Editor</a>&nbsp;&nbsp;&nbsp;<a href="/systemprompttestingAI">System Prompt Testing-AI</a>&nbsp;&nbsp;&nbsp;<a href="/audioanalyzerAI">Audio Analyzer AI</a></nav>
         <main>
             <div class="contenedor">
 <%- body -%>

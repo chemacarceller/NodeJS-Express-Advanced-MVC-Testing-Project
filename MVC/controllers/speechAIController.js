@@ -14,7 +14,7 @@ class SpeechAIController {
 
       // No data to retrieve on this home page
     
-      // Renders the 'views/indexView.ejs' file and passes data to it
+      // Renders the 'views/speechAIView.ejs' file and passes data to it
       res.render('speechAIView', { 
         title: 'Speech AI - My Testing Web Site',
       });

@@ -1,7 +1,9 @@
 const SpeechAIModel = require('../models/speechAIModel'); 
 
 class SpeechAIRepository { 
-    constructor() {}
+    constructor() {
+        this.speechAIModel = new SpeechAIModel();
+    }
 };
 
 module.exports = SpeechAIRepository;

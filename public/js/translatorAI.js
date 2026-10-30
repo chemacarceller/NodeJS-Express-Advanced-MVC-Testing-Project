@@ -47,8 +47,17 @@ const parameters = {
   // We display the conversation ID in the console
   console.log("=> translatorAI.js... translatorAID = " + translatorAID);
 
-  const sessionExpiredTimeoutTranslatorAI = setInterval(async () => {
-    try {
+  // Accessing environment variables
+  let config = {};
+  try {
+
+    const response = await fetch('/api/config');
+    config = await response.json();
+  
+    const timeoutMs = config?.EXPIRED_SESSION_CLIENT_CHECK_TIMEOUT ? parseInt(config.EXPIRED_SESSION_CLIENT_CHECK_TIMEOUT, 10) : 10000;
+
+    const sessionExpiredTimeoutSpeechAI = setInterval(async () => {
+      try {
 
         const response = await fetch('/api/client/expired-session-consult',{
           method: 'POST',
@@ -66,15 +75,18 @@ const parameters = {
         // If no error has occurred, check the response status to determine whether or not the session has expired.
         // Unlike cases where an error occurs—in which the error is provided via `data.error` and `data.details`—here, the message is provided via `data.msg`.
         if (data.status === 'expired') {
-            clearInterval(sessionExpiredTimeoutTranslatorAI);
+            clearInterval(sessionExpiredTimeoutSpeechAI);
             sessionStorage.clear();
             window.location.href = `/force-error?msg=${encodeURIComponent(data.msg)}`;
         }
-    } catch (error) {
+      } catch (error) {
         window.location.href = `/force-error?msg=${encodeURIComponent(error.message)}`;
-    }
-  }, 4000);
+      }
+    }, timeoutMs);
 
+  } catch (error) {
+    console.error("Could not load the constants from the .env file: ", error);
+  }  
 }
 
 

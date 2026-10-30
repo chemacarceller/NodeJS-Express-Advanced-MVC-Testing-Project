@@ -15,6 +15,15 @@ router.use('/speechAI', speechAIRouter);
 const translatorAIRouter = require('./TranslatorAIRoute');
 router.use('/translatorAI', translatorAIRouter); 
 
+const systemprompteditorRouter = require('./SystemPromptEditorRoute');
+router.use('/systemprompteditor', systemprompteditorRouter); 
+
+const systemprompttestingAIRouter = require('./SystemPromptTestingAIRoute');
+router.use('/systemprompttestingAI', systemprompttestingAIRouter); 
+
+const audioanalyzerAIRouter = require('./AudioAnalyzerAIRoute');
+router.use('/audioanalyzerAI', audioanalyzerAIRouter); 
+
 // The home route is handled via indexController.start
 const homeController = new HomeController();
 router.get('/', homeController.start); 

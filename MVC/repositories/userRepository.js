@@ -14,6 +14,7 @@ const mockUsers = [
 class UserRepository {
 
   constructor() {
+    this.userModel = new UserModel();
     this.findAll = this.findAll.bind(this);
   }
 

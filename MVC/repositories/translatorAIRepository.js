@@ -1,7 +1,9 @@
 const TranslatorAIModel = require('../models/translatorAIModel'); 
 
 class TranslatorAIRepository { 
-    constructor() {}
+    constructor() {
+        this.translatorAIModel = new TranslatorAIModel();
+    }
 };
 
 module.exports = TranslatorAIRepository;

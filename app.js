@@ -55,6 +55,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 // We enable the template system (Layouts) to have a common base design.
 app.use(expressLayouts); 
 
+// To allow client-side code to access server-side variables
+// F5_CLOSE_SESSION is sent as a boolean—true, provided it is not implicitly false
+app.use((req, res, next) => {
+    res.locals.F5_CLOSE_SESSION = process.env.F5_CLOSE_SESSION !== 'false';
+    next();
+});
+
 // Loads and connects the main router (route aggregator from the routes folder)
 // The home route is managed via an WebRoutes.js file located within ./routes
 const WebRoutes = require('./routes/WebRoutes');
@@ -74,6 +81,12 @@ app.get('/force-error', (req, res, next) => {
     return next(new Error(finalMessage));
 });
 
+app.get('/api/config', (req, res) => {
+  res.json({
+    F5_CLOSE_SESSION: process.env.F5_CLOSE_SESSION,
+    EXPIRED_SESSION_CLIENT_CHECK_TIMEOUT: process.env.EXPIRED_SESSION_CLIENT_CHECK_TIMEOUT
+  });
+});
 
 
 

@@ -1,7 +1,9 @@
 const TranslatorAIRepository = require('../repositories/translatorAIRepository');
 
 class TranslatorAIService { 
-    constructor() {}
+    constructor() {
+        this.translatorAIRepository = new TranslatorAIRepository();
+    }
 };
 
 module.exports = TranslatorAIService;

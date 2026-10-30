@@ -14,7 +14,7 @@ class TranslatorAIController {
 
       // No data to retrieve on this home page
     
-      // Renders the 'views/indexView.ejs' file and passes data to it
+      // Renders the 'views/translatorAIView.ejs' file and passes data to it
       res.render('translatorAIView', { 
         title: 'Translator AI - My Testing Web Site',
       });

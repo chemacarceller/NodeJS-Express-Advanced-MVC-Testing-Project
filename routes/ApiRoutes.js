@@ -16,7 +16,7 @@ router.post('/client/send-message', (req, res) => apiController.sendMessage(req,
 router.post('/client/create-custom-model', (req, res) => apiController.createCustomModel(req, res));
 router.post('/client/fix-model-system', (req, res) => apiController.fixModelSystem(req, res));
 router.post('/client/expired-session-consult', (req, res) => apiController.expiredSessionConsult(req, res));
-
-
+router.post('/client/closure-cancel', (req, res) => apiController.closureCancel(req, res));
+router.post('/client/closure-notify', (req, res) => apiController.closureNotify(req, res));
 
 module.exports = router;

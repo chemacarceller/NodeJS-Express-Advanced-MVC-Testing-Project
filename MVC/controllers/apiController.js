@@ -70,7 +70,7 @@ class ApiController {
             const data = await response.json();
 
             // If an error has occurred in the Intelligence Agent module, we forward it to the catch block
-            if (!response.ok) throw new Error(data);
+            if (!response.ok) throw new Error(JSON.stringify(data));
     
             // Respond to the HTTP client to close the request
             return res.status(200).json({ 
@@ -82,14 +82,23 @@ class ApiController {
 
         } catch (error) {
 
-            // If an error occurs within the try block of this class or in the Intelligence Agent module
+
             const realDetail = error.cause ? error.cause.message : error.message;
+
+            let errorTarget = 'Error in the Agent API Controller Module Failed to intialize the agent';
+            let detailsTarget = realDetail;
+
+            if (this.#isJsonValid(realDetail)) {
+                const parsedJson = JSON.parse(realDetail);
+                errorTarget = parsedJson.error || errorTarget;
+                detailsTarget = parsedJson.details || parsedJson;
+            }
 
             return res.status(500).json({
                 success: false,
-                error: error.error || 'Error in the Agent API Controller Module Failed to initialize the agent',
-                details: error.details || `${realDetail}`
-            });
+                error: errorTarget,
+                details: detailsTarget
+            });        
         }
     }
 
@@ -110,7 +119,7 @@ class ApiController {
             const data = await response.json();
 
             // If an error has occurred in the Intelligence Agent module, we forward it to the catch block
-            if (!response.ok) throw new Error(data);
+            if (!response.ok) throw new Error(JSON.stringify(data));
 
             // Respond to the HTTP client to close the request
             return res.status(200).json({ 
@@ -121,16 +130,24 @@ class ApiController {
 
         } catch (error) {
 
-            // If an error occurs within the try block of this class or in the Intelligence Agent module
+
             const realDetail = error.cause ? error.cause.message : error.message;
+
+            let errorTarget = 'Error in the Agent API Controller Module Failed to create custom model';
+            let detailsTarget = realDetail;
+
+            if (this.#isJsonValid(realDetail)) {
+                const parsedJson = JSON.parse(realDetail);
+                errorTarget = parsedJson.error || errorTarget;
+                detailsTarget = parsedJson.details || parsedJson;
+            }
 
             return res.status(500).json({
                 success: false,
-                error: error.error || 'Error in the Agent API Controller Module Failed to create the custom model',
-                details: error.details || `${realDetail}`
-            });
+                error: errorTarget,
+                details: detailsTarget
+            });        
         }
-
     }
 
 
@@ -150,7 +167,7 @@ class ApiController {
             const data = await response.json();
 
             // If an error has occurred in the Intelligence Agent module, we forward it to the catch block
-            if (!response.ok) throw new Error(data);
+            if (!response.ok) throw new Error(JSON.stringify(data));
 
             // Respond to the HTTP client to close the request
             return res.status(200).json({ 
@@ -161,14 +178,23 @@ class ApiController {
 
         } catch (error) {
 
-            // If an error occurs within the try block of this class or in the Intelligence Agent module
+
             const realDetail = error.cause ? error.cause.message : error.message;
+
+            let errorTarget = 'Error in the Agent API Controller Module Failed to fix the model';
+            let detailsTarget = realDetail;
+
+            if (this.#isJsonValid(realDetail)) {
+                const parsedJson = JSON.parse(realDetail);
+                errorTarget = parsedJson.error || errorTarget;
+                detailsTarget = parsedJson.details || parsedJson;
+            }
 
             return res.status(500).json({
                 success: false,
-                error: error.error || 'Error in the Agent API Controller Module Failed to fix the model',
-                details: error.details || `${realDetail}`
-            });
+                error: errorTarget,
+                details: detailsTarget
+            });        
         }
     }
 
@@ -189,7 +215,7 @@ class ApiController {
             const data = await response.json();
 
             // If an error has occurred in the Intelligence Agent module, we forward it to the catch block
-            if (!response.ok) throw new Error(data);
+            if (!response.ok) throw new Error(JSON.stringify(data));
 
             // Respond to the HTTP client to close the request
             return res.status(200).json({ 
@@ -201,14 +227,22 @@ class ApiController {
 
         } catch (error) {
 
-            // If an error occurs within the try block of this class or in the Intelligence Agent module
             const realDetail = error.cause ? error.cause.message : error.message;
+
+            let errorTarget = 'Error in the Agent API Controller Module Failed to send the message';
+            let detailsTarget = realDetail;
+
+            if (this.#isJsonValid(realDetail)) {
+                const parsedJson = JSON.parse(realDetail);
+                errorTarget = parsedJson.error || errorTarget;
+                detailsTarget = parsedJson.details || parsedJson;
+            }
 
             return res.status(500).json({
                 success: false,
-                error: error.error || 'Error in the Agent API Controller Module Failed to send the message',
-                details: error.details || `${realDetail}`
-            });
+                error: errorTarget,
+                details: detailsTarget
+            });        
         }
     }
 
@@ -228,7 +262,7 @@ class ApiController {
             const data = await response.json();
 
             // If an error has occurred in the Intelligence Agent module, we forward it to the catch block
-            if (!response.ok) throw new Error(data);
+            if (!response.ok) throw new Error(JSON.stringify(data));
 
             // Respond to the HTTP client to close the request
             return res.status(200).json({ 
@@ -239,16 +273,124 @@ class ApiController {
 
         } catch (error) {
 
-            // If an error occurs within the try block of this class or in the Intelligence Agent module
+
             const realDetail = error.cause ? error.cause.message : error.message;
+
+            let errorTarget = 'Error in the Agent API Controller Module Failed to consult the expired session';
+            let detailsTarget = realDetail;
+
+            if (this.#isJsonValid(realDetail)) {
+                const parsedJson = JSON.parse(realDetail);
+                errorTarget = parsedJson.error || errorTarget;
+                detailsTarget = parsedJson.details || parsedJson;
+            }
 
             return res.status(500).json({
                 success: false,
-                error: error.error || 'Error in the Agent API Controller Module during expired session consultation',
-                details: error.details || `${realDetail}`
-            });
+                error: errorTarget,
+                details: detailsTarget
+            });        
         }
     }
+
+    async closureCancel(req, res) {
+
+        try {
+
+            const { activeSessionIds } = req.body;
+
+            console.log("PETICION DE CANCELACION DE SESIONES : " + activeSessionIds);
+
+            // // We make the request to the intelligence agent service
+            // const response = await fetch(`${PRIVATE_AGENT_URL}/closure-notify`, {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({ sessionId })
+            // });
+
+            // const data = await response.json();
+
+            // // If an error has occurred in the Intelligence Agent module, we forward it to the catch block
+            // if (!response.ok) throw new Error(JSON.stringify(data));
+
+            return res.sendStatus(204); 
+
+        } catch (error) {
+
+
+            const realDetail = error.cause ? error.cause.message : error.message;
+
+            let errorTarget = 'Error in the Agent API Controller Module Failed to cancel the closure';
+            let detailsTarget = realDetail;
+
+            if (this.#isJsonValid(realDetail)) {
+                const parsedJson = JSON.parse(realDetail);
+                errorTarget = parsedJson.error || errorTarget;
+                detailsTarget = parsedJson.details || parsedJson;
+            }
+
+            return res.status(500).json({
+                success: false,
+                error: errorTarget,
+                details: detailsTarget
+            });        
+        }
+    }
+
+    async closureNotify(req, res) {
+
+        try {
+
+            const { activeSessionIds } = req.body;
+
+            console.log("PETICION DE ENVIO DE SESIONES A CERRAR : " + activeSessionIds);
+
+            // // We make the request to the intelligence agent service
+            const response = await fetch(`${PRIVATE_AGENT_URL}/closure-notify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ activeSessionIds })
+            });
+
+             const data = await response.json();
+
+            // If an error has occurred in the Intelligence Agent module, we forward it to the catch block
+            if (!response.ok) throw new Error(JSON.stringify(data));
+
+            return res.sendStatus(204); 
+
+        } catch (error) {
+
+
+            const realDetail = error.cause ? error.cause.message : error.message;
+
+            let errorTarget = 'Error in the Agent API Controller Module Failed to notify the closure';
+            let detailsTarget = realDetail;
+
+            if (this.#isJsonValid(realDetail)) {
+                const parsedJson = JSON.parse(realDetail);
+                errorTarget = parsedJson.error || errorTarget;
+                detailsTarget = parsedJson.details || parsedJson;
+            }
+
+            return res.status(500).json({
+                success: false,
+                error: errorTarget,
+                details: detailsTarget
+            });        
+        }
+    }   
+    
+    #isJsonValid(str) {
+        if (typeof str !== 'string') return false;
+        try {
+            const result = JSON.parse(str);
+            return (typeof result === 'object' && result !== null);
+        } catch (e) {
+            return false;
+        }
+    }
+
 }
 
 module.exports = ApiController;

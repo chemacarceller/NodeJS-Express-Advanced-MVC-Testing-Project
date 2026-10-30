@@ -28,8 +28,17 @@ async function init() {
   // We display the conversation ID in the console
   console.log("=> speechAI.js... speechAID = " + speechAID);
 
-  const sessionExpiredTimeoutSpeechAI = setInterval(async () => {
-    try {
+  // Accessing environment variables
+  let config = {};
+  try {
+
+    const response = await fetch('/api/config');
+    config = await response.json();
+  
+    const timeoutMs = config?.EXPIRED_SESSION_CLIENT_CHECK_TIMEOUT ? parseInt(config.EXPIRED_SESSION_CLIENT_CHECK_TIMEOUT, 10) : 10000;
+
+    const sessionExpiredTimeoutSpeechAI = setInterval(async () => {
+      try {
 
         const response = await fetch('/api/client/expired-session-consult',{
           method: 'POST',
@@ -51,11 +60,16 @@ async function init() {
             sessionStorage.clear();
             window.location.href = `/force-error?msg=${encodeURIComponent(data.msg)}`;
         }
-    } catch (error) {
-      window.location.href = `/force-error?msg=${encodeURIComponent(error.message)}`;
-    }
-  }, 10000);
+      } catch (error) {
+        window.location.href = `/force-error?msg=${encodeURIComponent(error.message)}`;
+      }
+    }, timeoutMs);
+    
+  } catch (error) {
+    console.error("Could not load the constants from the .env file: ", error);
+  }  
 }
+
 
 document.addEventListener('DOMContentLoaded', async () => {
 

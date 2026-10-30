@@ -2,7 +2,9 @@ const HomeRepository = require('../repositories/homeRepository');
 
 class HomeService { 
 
-    constructor() { }
+    constructor() { 
+        this.homeRepository = new HomeRepository();
+    }
 };
 
 module.exports = HomeService;
