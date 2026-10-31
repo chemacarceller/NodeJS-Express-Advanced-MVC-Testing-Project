@@ -24,6 +24,12 @@ router.use('/systemprompttestingAI', systemprompttestingAIRouter);
 const audioanalyzerAIRouter = require('./AudioAnalyzerAIRoute');
 router.use('/audioanalyzerAI', audioanalyzerAIRouter); 
 
+const manequinmanAIRouter = require('./ManequinManAIRoute');
+router.use('/manequinmanAI', manequinwManAIRouter); 
+
+const manequinwomanAIRouter = require('./ManequinWomanAIRoute');
+router.use('/manequinwomanAI', manequinwomanAIRouter);
+
 // The home route is handled via indexController.start
 const homeController = new HomeController();
 router.get('/', homeController.start); 
