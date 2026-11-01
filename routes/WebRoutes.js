@@ -25,7 +25,7 @@ const audioanalyzerAIRouter = require('./AudioAnalyzerAIRoute');
 router.use('/audioanalyzerAI', audioanalyzerAIRouter); 
 
 const manequinmanAIRouter = require('./ManequinManAIRoute');
-router.use('/manequinmanAI', manequinwManAIRouter); 
+router.use('/manequinmanAI', manequinmanAIRouter); 
 
 const manequinwomanAIRouter = require('./ManequinWomanAIRoute');
 router.use('/manequinwomanAI', manequinwomanAIRouter);
