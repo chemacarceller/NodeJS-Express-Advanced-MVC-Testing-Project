@@ -1,0 +1,94 @@
+.container-3d {
+    width: 100%;
+    height: calc(73vh - 80px); 
+    display: flex;
+    flex-direction: row; 
+    gap: 15px;           
+    padding: 20px;
+    box-sizing: border-box;
+    font-family: sans-serif;
+    color: #1a1a1a;
+    background-color: #fff;
+}
+
+.container-3d h2 {
+    margin: 0 0 15px 0;
+    font-size: 24px;
+    text-align: center;
+    flex-shrink: 0;
+    width: 100%; 
+}
+
+#canvas-container, #canvas-container2 {
+    width: 50%;         
+    flex-grow: 1;
+    height: 100%;       
+    background-color: #aaa;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    min-height: 300px;
+}
+
+#canvas-container2 {
+    background-color: #555;
+}
+
+#canvas-container canvas, #canvas-container2 canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+
+.custom-select-wrapper {
+    position: relative;
+    width: 100%;
+    user-select: none;
+}
+
+.custom-select-trigger {
+    background: #ffffff;
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.custom-select-options {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    z-index: 99999; /* Flota por encima de todo el panel */
+    
+    /* CONTROL DE ESPACIO RIGUROSO: Ajusta este alto a tu gusto */
+    max-height: 240px;  
+    overflow-y: auto;  
+}
+
+.custom-select-wrapper.open .custom-select-options {
+    display: block;
+}
+
+.custom-option-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    color: #333;
+    font-size: 14px;
+}
+
+.custom-option-item:hover {
+    background-color: #007bff;
+    color: white;
+}

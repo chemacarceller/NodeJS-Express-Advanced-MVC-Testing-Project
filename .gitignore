@@ -1,3 +1,4 @@
 # .gitignore
+GLB_models/
 node_modules/
 .env

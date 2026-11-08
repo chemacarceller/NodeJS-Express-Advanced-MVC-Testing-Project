@@ -1,0 +1,89 @@
+<link rel="stylesheet" href="/css/characterAI.css">
+
+<%- contentFor('scripts') %>
+
+<script type="importmap">
+    {
+        "imports": {
+            "three": "/three/build/three.module.js",
+            "three/addons/": "/three/examples/jsm/"
+        }
+    }
+</script>
+
+<script type="module" src="/js/characterAI.js"></script>
+
+<%- contentFor('body') %>
+<div class="container-3d-wrapper" style="display: flex; flex-direction: column; height: calc(80vh - 60px);">
+    <h2>Character Animations AI</h2>
+    
+    <div class="container-3d">
+        <div style="display: flex; width: 100vw; height: 65vh; margin: 0; padding: 0; box-sizing: border-box; overflow: hidden;">
+            <div style="width: 50%; height: 100%; display: flex; flex-direction: column; background-color: #000;">
+                <div id="canvas-container" style="width: 100%; flex-grow: 1; background-color: #000;"></div>
+                <div style="width: 100%; display: flex; gap: 10px; padding: 15px; box-sizing: border-box; background-color: #222; border-top: 2px solid #333; align-items: stretch;">
+                    <textarea id="ai-prompt-input" 
+                    style="flex-grow: 1; height: 150px; padding: 10px; resize: none; border-radius: 4px; border: 1px solid #222; background-color: #ddd; color: white; font-family: sans-serif; box-sizing: border-box;" 
+                    placeholder="Ej: Levanta el brazo izquierdo o saluda con la mano derecha..."></textarea>
+            
+                    <div style="display: flex; flex-direction: column; gap: 10px; justify-content: space-between; width: 120px;">
+                        <button id="send-ai-btn" 
+                        style="width: 100%; flex-grow: 1; cursor: pointer; font-weight: bold; background-color: #007bff; color: white; border: none; border-radius: 4px; transition: background 0.2s;">
+                        Send
+                        </button>
+                        <button id="transcript-btn" 
+                        style="width: 100%; flex-grow: 1; cursor: pointer; font-weight: bold; background-color: #28a745; color: white; border: none; border-radius: 4px; transition: background 0.2s;">
+                        Start Dictation
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 50%; height: 100%; display: flex; flex-direction: column; gap: 15px; padding: 20px; box-sizing: border-box; background-color: #f5f5f5; overflow-y: auto;">                
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label for="file-input" style="font-weight: bold;">Upload new model (.glb):</label>
+                    <input type="file" id="file-input" accept=".glb" style="padding: 8px; border: 1px dashed #666; border-radius: 4px; background: white; cursor: pointer;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label for="model-selector" style="font-weight: bold;">Active Character : </label>
+                    <select id="model-selector" style="padding: 8px; width: 100%;">
+                        <option value="none" selected>-- Select a model... --</option>
+                    </select>
+                </div>
+                <div id="container2" style="display: flex; flex-direction: column; gap: 5px; position: relative;">
+    <label style="font-weight: bold;">Select an animation : </label>
+    
+    <!-- Este es el contenedor que resolverá el problema del espacio -->
+    <div class="custom-select-wrapper" id="custom-select-wrapper">
+        <div class="custom-select-trigger" id="custom-trigger">
+            <span id="custom-selected-text">-- Select an animation... --</span>
+            <span>▼</span>
+        </div>
+        <div class="custom-select-options" id="custom-options-box">
+            <!-- Las opciones se generarán aquí solas mediante el script "vigilante" -->
+        </div>
+    </div>
+
+    <!-- Tu select original se queda aquí, pero oculto para que no estorbe la pantalla -->
+    <select id="animation-selector" style="display: none;"></select>
+</div>
+                <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                    <label for="code-input" style="font-weight: bold; margin-bottom: 5px;">
+                        Programming Movement (JS) :
+                    </label>
+                    <textarea id="code-input" style="width: 100%; flex-grow: 1; font-family: monospace; padding: 10px; resize: none; box-sizing: border-box;" placeholder="// Escribe código aquí...&#10;// Ejemplo:&#10;model.rotation.y = Math.sin(time * 2);">model.rotation.y = Math.sin(time * 2);</textarea>
+    
+                    <button id="apply-code-btn" style="margin-top: 10px; width: 100%; padding: 12px; cursor: pointer; font-weight: bold; background-color: #333; color: white; border: none; border-radius: 4px;">
+                        Validate Code Modifications
+                    </button>
+
+                    <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px; background: #e0e0e0; padding: 10px; border-radius: 4px;">
+                        <input type="checkbox" id="toggle-code-checkbox" style="width: 18px; height: 18px; cursor: pointer;">
+                        <label for="toggle-code-checkbox" style="font-weight: bold; cursor: pointer; user-select: none;">
+                            Activate custom code (Pauses the base animation)
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

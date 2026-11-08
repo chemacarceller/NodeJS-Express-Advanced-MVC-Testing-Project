@@ -71,6 +71,13 @@ app.use('/', WebRoutes);
 const ApiRoutes = require('./routes/ApiRoutes');
 app.use('/api', ApiRoutes); 
 
+// Servir tus archivos públicos habituales (CSS, imágenes, modelo.glb)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// NUEVA LÍNEA: Exponer la carpeta de Three.js de node_modules al navegador
+app.use('/three', express.static(path.join(__dirname, 'node_modules/three')));
+
+
 
 // It serves to efficiently silence the automatic requests that web browsers make when looking for your website's icon (the favicon).
 app.get('/favicon.ico', (req, res) => res.status(204).end());

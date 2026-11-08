@@ -1,10 +1,10 @@
-const ManequinManAIService = require('../services/manequinmanAIService');
+const CharacterAIService = require('../services/characterAIService');
 
 // The controller class simply manages data loading and view rendering.
-class ManequinManAIController {
+class CharacterAIController {
 
   constructor() {
-    this.manequinmanAIService = new ManequinManAIService();
+    this.characterAIService = new CharacterAIService();
     this.start = this.start.bind(this);
   }
 
@@ -15,8 +15,8 @@ class ManequinManAIController {
       // No data to retrieve on this home page
     
       // Renders the 'views/manequinmanAIView.ejs' file and passes data to it
-      res.render('manequinmanAIView', { 
-        title: 'Manequin Man Animations AI - My Testing Web Site',
+      res.render('characterAIView', { 
+        title: 'Character Animations AI - My Testing Web Site',
       });
     
     } catch (error) {
@@ -28,4 +28,4 @@ class ManequinManAIController {
   }
 }
 
-module.exports = ManequinManAIController;
+module.exports = CharacterAIController;
