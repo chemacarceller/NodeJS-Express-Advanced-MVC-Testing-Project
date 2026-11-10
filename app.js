@@ -71,7 +71,7 @@ app.use('/', WebRoutes);
 const ApiRoutes = require('./routes/ApiRoutes');
 app.use('/api', ApiRoutes); 
 
-// Servir tus archivos públicos habituales (CSS, imágenes, modelo.glb)
+// Servir tus archivos públicos habituales (CSS, imágenes, model.glb)
 app.use(express.static(path.join(__dirname, 'public')));
 
 // NUEVA LÍNEA: Exponer la carpeta de Three.js de node_modules al navegador

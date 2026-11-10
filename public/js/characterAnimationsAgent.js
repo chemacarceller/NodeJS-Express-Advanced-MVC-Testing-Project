@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-export default class IAnimationsAgent {
+export default class CharacterAnimationsAgent {
 
     // static constants
     static DB_NAME="GlbViewerDB";
@@ -14,7 +14,10 @@ export default class IAnimationsAgent {
 
     // Class constructor
     // Receives the width and height of the rendering window
-    constructor(width, height) {
+    constructor(container) {
+
+        const width = container.getBoundingClientRect().width || container.clientWidth;
+        const height = container.getBoundingClientRect().height || container.clientHeight;
 
         this.mixer = null; 
         this.activeAction = null; 
@@ -38,6 +41,8 @@ export default class IAnimationsAgent {
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
         this.renderer.toneMappingExposure = 1.0;
+        this.renderer.setSize(width,height);
+        container.appendChild(this.renderer.domElement);
 
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
@@ -56,6 +61,7 @@ export default class IAnimationsAgent {
 
     }
 
+
     // We initialize IndexedDB, where we will store the models instead of saving them on the server.
     // This is a client-side library, so it has direct access to IndexedDB.
     // In a more advanced version, we will implement a feature to upload the model to the application server.
@@ -63,12 +69,12 @@ export default class IAnimationsAgent {
 
         return new Promise((resolve, reject) => {
 
-            const request = indexedDB.open(IAnimationsAgent.DB_NAME, IAnimationsAgent.DB_VERSION);
+            const request = indexedDB.open(CharacterAnimationsAgent.DB_NAME, CharacterAnimationsAgent.DB_VERSION);
         
             request.onupgradeneeded = (e) => {
                 const database = e.target.result;
-                if (!database.objectStoreNames.contains(IAnimationsAgent.STORE_NAME)) {
-                    database.createObjectStore(IAnimationsAgent.STORE_NAME, { keyPath: "id" });
+                if (!database.objectStoreNames.contains(CharacterAnimationsAgent.STORE_NAME)) {
+                    database.createObjectStore(CharacterAnimationsAgent.STORE_NAME, { keyPath: "id" });
                 }
             };
         
@@ -84,8 +90,8 @@ export default class IAnimationsAgent {
     }
 
 
-    // Store the model contained in fileBlob with the specified ID and name
-    guardarModelInDB(id, name, fileBlob) {
+    // Saves the model contained in fileBlob with the specified ID and name
+    saveModelInDB(id, name, fileBlob) {
 
         return new Promise((resolve, reject) => {
 
@@ -93,9 +99,9 @@ export default class IAnimationsAgent {
                 reject("The database is not initialized.");
                 return;
             }
-        
-            const transaction = this.db.transaction([IAnimationsAgent.STORE_NAME], "readwrite");
-            const store = transaction.objectStore(IAnimationsAgent.STORE_NAME);
+    
+            const transaction = this.db.transaction([CharacterAnimationsAgent.STORE_NAME], "readwrite");
+            const store = transaction.objectStore(CharacterAnimationsAgent.STORE_NAME);
             const request = store.openCursor();
 
             request.onsuccess = (event) => {
@@ -103,25 +109,45 @@ export default class IAnimationsAgent {
                 const cursor = event.target.result;
 
                 if (cursor) {
+                
                     if (cursor.value.name === name) {
-                        const idExistente = cursor.value.id;
 
-                        const deleteRequest = store.delete(idExistente);;
-                        const updateRequest = store.put({ id: id, name, blob: fileBlob });
+                        const existingId = cursor.value.id;
+
+                        const deleteRequest = store.delete(existingId);
                     
-                        updateRequest.onsuccess = () => {
-                            resolve(); 
+                        deleteRequest.onsuccess = () => {
+
+                            const updateRequest = store.put({ id: id, name, blob: fileBlob });
+
+                            updateRequest.onsuccess = () => {
+                                resolve();
+                            };
+
+                            updateRequest.onerror = (err) => {
+                                reject(err);
+                            };
                         };
+
+                        deleteRequest.onerror = (err) => {
+                            reject(err);
+                        };
+
                         return; 
                     }
+
                     cursor.continue();
 
                 } else {
 
                     const insertRequest = store.put({ id, name, blob: fileBlob });
-                
+            
                     insertRequest.onsuccess = () => {
                         resolve(); 
+                    };
+
+                    insertRequest.onerror = (err) => {
+                        reject(err);
                     };
                 }
             };
@@ -134,8 +160,9 @@ export default class IAnimationsAgent {
     }
 
 
+
     // We retrieve the list of models {id,name} stored in this IndexedDB
-    cargarListaModelosPersistidos() {
+    getModelListFromDB() {
     
         return new Promise((resolve, reject) => {
             if (!this.db) {
@@ -143,20 +170,20 @@ export default class IAnimationsAgent {
                 return;
             }
 
-            const transaction = this.db.transaction([IAnimationsAgent.STORE_NAME], "readonly");
-            const store = transaction.objectStore(IAnimationsAgent.STORE_NAME);
+            const transaction = this.db.transaction([CharacterAnimationsAgent.STORE_NAME], "readonly");
+            const store = transaction.objectStore(CharacterAnimationsAgent.STORE_NAME);
             const request = store.getAll();
 
             request.onsuccess = () => {
     
-                const modelosGuardados = request.result;
+                const savedModels = request.result;
             
-                const listaModelos = modelosGuardados.map(item => ({
+                const modelsList = savedModels.map(item => ({
                     id: item.id,
                     name: item.name
                 }));
             
-                resolve(listaModelos);
+                resolve(modelsList);
             };
 
             request.onerror = (event) => {
@@ -167,10 +194,9 @@ export default class IAnimationsAgent {
     }
 
     
-
     // Retrieve the binary code for the model specified by the ID
     // We also obtain the list of bones for this model, which is needed to pass it to the AI
-    cargarModeloDesdeDB(id) {
+    getModelBlobFromDB(id) {
     
         return new Promise((resolve, reject) => {
     
@@ -179,8 +205,8 @@ export default class IAnimationsAgent {
                 return;
             }
 
-            const transaction = this.db.transaction([IAnimationsAgent.STORE_NAME], "readonly");
-            const store = transaction.objectStore(IAnimationsAgent.STORE_NAME);
+            const transaction = this.db.transaction([CharacterAnimationsAgent.STORE_NAME], "readonly");
+            const store = transaction.objectStore(CharacterAnimationsAgent.STORE_NAME);
             const request = store.get(id);
 
             request.onsuccess = () => {
@@ -193,15 +219,15 @@ export default class IAnimationsAgent {
 
                 const blobURL = URL.createObjectURL(item.blob);
 
-                IAnimationsAgent.loader.load(
+                CharacterAnimationsAgent.loader.load(
                     blobURL, 
                     (gltf) => {
-                        const huesosDelModelo = [];
-                        const personaje = gltf.scene;
+                        const modelBones = [];
+                        const character = gltf.scene;
                         
-                        personaje.traverse((object) => {
+                        character.traverse((object) => {
                             if (object.isBone) {
-                                huesosDelModelo.push(object.name);
+                                modelBones.push(object.name);
                             }
                         });
 
@@ -209,8 +235,8 @@ export default class IAnimationsAgent {
 
                         resolve({
                             gltf: gltf,
-                            huesos: huesosDelModelo,
-                            nombre: item.name
+                            bones: modelBones,
+                            name: item.name
                         });
                     }, 
                     undefined, 
@@ -229,9 +255,10 @@ export default class IAnimationsAgent {
         });
     }
 
+
     // Changes the character model in the scene
     // If the scene is not provided—which is the usual case—it uses the scene `this.scene`.
-    cambiarModeloEscena(gltf, sceneInstance) {
+    loadNewModelInScene(gltf, sceneInstance) {
     
         const sceneToUse = sceneInstance || this.scene;
 
@@ -271,8 +298,8 @@ export default class IAnimationsAgent {
         this.actionsMap = {};
         this.mixer = new THREE.AnimationMixer(this.characterModel);
 
-        const listaAnimaciones = [];
-        let nombreAnimacionPorDefecto = "";
+        const animationsList = [];
+        let defaultAnimation = "";
         let actionToRun = null;
 
         if (gltf.animations && gltf.animations.length > 0) {
@@ -280,17 +307,17 @@ export default class IAnimationsAgent {
                 const action = this.mixer.clipAction(clip);
                 this.actionsMap[clip.name] = action;
                 
-                listaAnimaciones.push(clip.name);
+                animationsList.push(clip.name);
 
                 if (clip.name === "Idle") { 
-                    nombreAnimacionPorDefecto = clip.name;
+                    defaultAnimation = clip.name;
                     actionToRun = action;
                 }
             });
 
             if (!actionToRun && gltf.animations.length > 0) {
-                nombreAnimacionPorDefecto = gltf.animations[0].name;
-                actionToRun = this.actionsMap[nombreAnimacionPorDefecto];
+                defaultAnimation = gltf.animations[0].name;
+                actionToRun = this.actionsMap[defaultAnimation];
             }
 
             if (actionToRun) {
@@ -300,10 +327,11 @@ export default class IAnimationsAgent {
         }
 
         return {
-            animaciones: listaAnimaciones,
-            default: nombreAnimacionPorDefecto
+            animations: animationsList,
+            default: defaultAnimation
         };
     }
+
 
     // Check that the code provided by the user is correct
     compileCustomCode(userCode) {
@@ -323,50 +351,52 @@ export default class IAnimationsAgent {
         }
     }
 
+
     // ToDo: Method to execute the data provided by the AI
-    ejecutarComandosIA(dataIA, personajeGLTF = null) {
+    executeAIData(dataAI, characterGLTF = null) {
     
-        const modelo = personajeGLTF || this.characterModel;
+        const model = characterGLTF || this.characterModel;
     
-        if (!modelo) {
+        if (!model) {
             console.warn("There is no model loaded or provided for executing AI commands.");
             return;
         }
 
-        if (!dataIA || !Array.isArray(dataIA.acciones)) {
+        if (!dataAI || !Array.isArray(dataAI.actions)) {
             console.warn("The AI ​​data lacks a valid structure, or the 'actions' array is missing.");
             return;
         }
 
-        dataIA.acciones.forEach(accion => {
+        dataAI.actions.forEach(action => {
     
-            const hueso = modelo.getObjectByName(accion.hueso);
-            if (!hueso) {
-                console.warn(`The bone '${accion.hueso}' was not found in the model.`);
+            const bone = model.getObjectByName(action.bone);
+            if (!bone) {
+                console.warn(`The bone '${action.bone}' was not found in the model.`);
                 return;
             }
 
-            if (accion.rotacion !== undefined) {
-                const targetRotation = { ...hueso.rotation };
-                targetRotation[accion.eje] = accion.rotacion;
+            if (action.rotation !== undefined) {
+                const targetRotation = { ...bone.rotation };
+                targetRotation[action.eje] = action.rotation;
 
-                new TWEEN.Tween(hueso.rotation)
-                    .to(targetRotation, accion.duracion)
+                new TWEEN.Tween(bone.rotation)
+                    .to(targetRotation, action.duracion)
                     .easing(TWEEN.Easing.Cubic.Out)
                     .start();
             }
         
-            if (accion.posicion !== undefined) {
-                const targetPosition = { ...hueso.position };
-                targetPosition[accion.eje] = accion.posicion;
+            if (action.position !== undefined) {
+                const targetPosition = { ...bone.position };
+                targetPosition[action.eje] = action.position;
 
-                new TWEEN.Tween(hueso.position)
-                    .to(targetPosition, accion.duracion)
+                new TWEEN.Tween(bone.position)
+                    .to(targetPosition, action.duracion)
                     .easing(TWEEN.Easing.Cubic.Out)
                     .start();
             }
         });
     }
+
 
     // Remove the character from the scene
     removeCharacter() {
@@ -387,15 +417,16 @@ export default class IAnimationsAgent {
             });
         }
     }
+  
     
     // Method that enables the execution of code or runs the selected animation
-    actualizar(timestamp, ejecutarCodigoPersonalizado) {
+    tick(timestamp, useCustomCode) {
 
-        IAnimationsAgent.timer.update(timestamp); 
-        const delta = IAnimationsAgent.timer.getDelta(); 
-        const elapsedTime = IAnimationsAgent.timer.getElapsed(); 
+        CharacterAnimationsAgent.timer.update(timestamp); 
+        const delta = CharacterAnimationsAgent.timer.getDelta(); 
+        const elapsedTime = CharacterAnimationsAgent.timer.getElapsed(); 
 
-        if (ejecutarCodigoPersonalizado) {
+        if (useCustomCode) {
             if (this.characterModel && this.customMovementFn) {
                 try {
                     this.customMovementFn(this.characterModel, elapsedTime, this.baseHeight, THREE);
@@ -414,8 +445,9 @@ export default class IAnimationsAgent {
         return true;
     }
 
+
     // Method that plays an animation
-    playAction(id) {
+    playAnimation(id) {
         const nextAction = this.actionsMap[id];
         if (!nextAction || nextAction === this.activeAction) return;
         nextAction.reset().play();
@@ -426,15 +458,10 @@ export default class IAnimationsAgent {
 
 
 
-    // Additional methods can be added as needed
-    // Getter and setter methods...
-    setRendererSize(w, h) {
-        this.renderer.setSize(w, h);
-    }
 
-    getRendererDomElement() {
-        return this.renderer.domElement
-    }
+
+
+    // Additional methods can be added as needed
 
     updateControls() {
         if (this.controls) this.controls.update(); 
@@ -446,12 +473,13 @@ export default class IAnimationsAgent {
         }
     }
 
-    updateCamera(w, h) {
+    resize(w, h) {
         this.camera.aspect = w / h;
         this.camera.updateProjectionMatrix();
+        this.renderer.setSize(w,h);
     }
 
-    restartAnimation() {
+    resetModelTransform() {
         if (this.characterModel) {
             this.characterModel.position.set(-this.characterModel.position.x, this.baseHeight, -this.characterModel.position.z);
             this.characterModel.rotation.set(0, 0, 0);

@@ -1,4 +1,4 @@
-import IAnimationsAgent from './iAnimationsAgent.js';
+import CharacterAnimationsAgent from './characterAnimationsAgent.js';
 
 
 
@@ -7,10 +7,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const container = document.getElementById('canvas-container');
 
     if (!container) return;
-    const width = container.getBoundingClientRect().width || container.clientWidth;
-    const height = container.getBoundingClientRect().height || container.clientHeight;
 
-    const iAnimationsAgent = new IAnimationsAgent(width, height);
+    const characterAnimationsAgent = new CharacterAnimationsAgent(container);
 
     const applyBtn = document.getElementById('apply-code-btn');
     const fileInput = document.getElementById('file-input');
@@ -24,12 +22,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const codeTextArea = document.getElementById('code-input');
     const toggleCodeCheckbox = document.getElementById('toggle-code-checkbox');
 
-    iAnimationsAgent.setRendererSize(width,height);
-    container.appendChild(iAnimationsAgent.getRendererDomElement());
-
     try {
 
-        await iAnimationsAgent.initDB();
+        await characterAnimationsAgent.initDB();
 
         // We add the first option to the models dropdown menu
         selectModelElement.innerHTML = '';
@@ -41,9 +36,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
 
-            const modelos = await iAnimationsAgent.cargarListaModelosPersistidos();
+            const models = await characterAnimationsAgent.getModelListFromDB();
 
-            modelos.forEach((item) => {
+            models.forEach((item) => {
 
                 const option = document.createElement('option');
                 option.value = item.id;
@@ -53,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
         } catch (error) {
-            console.error("No se pudieron cargar los modelos en la UI:", error);
+            console.error("The models could not be loaded in the UI : ", error);
         }
 
     } catch (err) {
@@ -77,13 +72,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const timestamp = Date.now().toString(36); 
             const uuidSguro = crypto.randomUUID();
             const idUnico = `${timestamp}-${uuidSguro}`; 
-            const nombreArchivo = file.name;
+            const nameArchivo = file.name;
 
             try {
 
-                await iAnimationsAgent.initDB(); 
+                await characterAnimationsAgent.initDB(); 
 
-                await iAnimationsAgent.guardarModelInDB(idUnico, nombreArchivo, file);
+                await characterAnimationsAgent.saveModelInDB(idUnico, nameArchivo, file);
 
                 selectModelElement.innerHTML = '';
                 const defaultOpt = document.createElement('option');
@@ -94,16 +89,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 try {
 
                     
-                    const modelos = await iAnimationsAgent.cargarListaModelosPersistidos();
+                    const models = await characterAnimationsAgent.getModelListFromDB();
 
                     
-                    modelos.forEach((item) => {
+                    models.forEach((item) => {
 
                         const option = document.createElement('option');
                         option.value = item.id;
                         option.textContent = item.name + " (Saved)";
             
-                        if (item.name === nombreArchivo && nombreArchivo !== '') {
+                        if (item.name === nameArchivo && nameArchivo !== '') {
                             option.selected = true;
                         }
             
@@ -111,31 +106,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
 
                 } catch (error) {
-                    console.error("No se pudieron cargar los modelos en la UI:", error);
+                    console.error("The models could not be loaded in the UI : ", error);
                 }
 
             } catch (err) {
-                console.error("Error en el flujo de base de datos:", err);
+                console.error("Error in the database flow : ", err);
             }
 
             try {
 
-                const datosModelo = await iAnimationsAgent.cargarModeloDesdeDB(idUnico);
+                const datosmodel = await characterAnimationsAgent.getModelBlobFromDB(idUnico);
         
-                const resultadoAnimaciones = iAnimationsAgent.cambiarModeloEscena(datosModelo.gltf);
+                const resultadoanimations = characterAnimationsAgent.loadNewModelInScene(datosmodel.gltf);
 
                 if (selectAnimElement) {
 
                     selectAnimElement.innerHTML = '';
 
-                    if (resultadoAnimaciones.animaciones.length > 0) {
+                    if (resultadoanimations.animations.length > 0) {
 
-                        resultadoAnimaciones.animaciones.forEach((nombreClip) => {
+                        resultadoanimations.animations.forEach((nameClip) => {
                             const option = document.createElement('option');
-                            option.value = nombreClip;
-                            option.textContent = nombreClip;
+                            option.value = nameClip;
+                            option.textContent = nameClip;
                     
-                            if (nombreClip === resultadoAnimaciones.default) {
+                            if (nameClip === resultadoanimations.default) {
                                 option.selected = true;
                             }
                             selectAnimElement.appendChild(option);
@@ -150,7 +145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 }
             } catch (error) {
-                console.error("Error en el flujo de cambio de modelo:", error);
+                console.error("Error in the model change flow : ", error);
             }
         });
     }
@@ -165,7 +160,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (idSeleccionado === 'none') {
 
-                iAnimationsAgent.removeCharacter();
+                characterAnimationsAgent.removeCharacter();
                 if (selectAnimElement) selectAnimElement.innerHTML = '<option value="">-- Select a model first --</option>';
                 return;
 
@@ -173,22 +168,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 try {
 
-                    const datosModelo = await iAnimationsAgent.cargarModeloDesdeDB(idSeleccionado);
-                    const resultadoAnimaciones = iAnimationsAgent.cambiarModeloEscena(datosModelo.gltf);
+                    const datosmodel = await characterAnimationsAgent.getModelBlobFromDB(idSeleccionado);
+                    const resultadoanimations = characterAnimationsAgent.loadNewModelInScene(datosmodel.gltf);
         
                     if (selectAnimElement) {
 
                         selectAnimElement.innerHTML = '';
 
-                        if (resultadoAnimaciones.animaciones.length > 0) {
+                        if (resultadoanimations.animations.length > 0) {
 
-                            resultadoAnimaciones.animaciones.forEach((nombreClip) => {
+                            resultadoanimations.animations.forEach((nameClip) => {
 
                                 const option = document.createElement('option');
-                                option.value = nombreClip;
-                                option.textContent = nombreClip;
+                                option.value = nameClip;
+                                option.textContent = nameClip;
                     
-                                if (nombreClip === 'Idle') {
+                                if (nameClip === 'Idle') {
                                     option.selected = true;
                                 }
                                 selectAnimElement.appendChild(option);
@@ -203,7 +198,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
 
                     const userCode = codeTextArea.textContent;
-                    const esExitoso = iAnimationsAgent.compileCustomCode(userCode);
+                    const esExitoso = characterAnimationsAgent.compileCustomCode(userCode);
 
                     if (esExitoso) {
                         codeTextArea.style.backgroundColor = '#e8f5e9';
@@ -217,10 +212,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }
                 } catch (error) {
-                    console.error("Error en el flujo de cambio de modelo:", error);
+                    console.error("Error in the model change flow : ", error);
                 }
-    
-                console.log(`Modelo listo en la escena principal.`);
             }
         });
     }
@@ -230,7 +223,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (selectAnimElement) {
 
         selectAnimElement.addEventListener('change', (event) => {
-            iAnimationsAgent.playAction(event.target.value);
+            characterAnimationsAgent.playAnimation(event.target.value);
         });
     }
 
@@ -242,7 +235,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         applyBtn.style.cursor = "not-allowed";
 
         const userCode = codeTextArea.textContent;
-        const esExitoso = iAnimationsAgent.compileCustomCode(userCode);
+        const esExitoso = characterAnimationsAgent.compileCustomCode(userCode);
 
         if (esExitoso) {
             codeTextArea.style.backgroundColor = '#e8f5e9'; // Verde claro
@@ -264,7 +257,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (toggleCodeCheckbox) {
         toggleCodeCheckbox.addEventListener('change', () => {
             if (!toggleCodeCheckbox.checked) {
-                iAnimationsAgent.restartAnimation();
+                characterAnimationsAgent.resetModelTransform();
             }
         });
     }
@@ -299,8 +292,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const w = container.clientWidth;
         const h = container.clientHeight;
-        iAnimationsAgent.updateCamera(w,h);
-        iAnimationsAgent.setRendererSize(w,h);
+        characterAnimationsAgent.resize(w,h);
     });
 
     // This code is for the animations dropdown 
@@ -363,7 +355,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // It is specified whether to execute the custom code or the animation
         const ejecutarCodigoPersonalizado = toggleCodeCheckbox && toggleCodeCheckbox.checked;
-        const ejecucionExitosa = iAnimationsAgent.actualizar(timestamp, ejecutarCodigoPersonalizado);
+        const ejecucionExitosa = characterAnimationsAgent.tick(timestamp, ejecutarCodigoPersonalizado);
 
         // If you cannot execute the code...
         if (!ejecucionExitosa) {        
@@ -372,11 +364,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // Updates the camera controls
-        iAnimationsAgent.updateControls();
+        characterAnimationsAgent.updateControls();
 
         // Internally calls the renderer's method (this.renderer.render(scene, camera)) to physically draw the changes 
         // for this frame onto the <canvas>.
-        iAnimationsAgent.render();
+        characterAnimationsAgent.render();
     }
 
     animate(0);
