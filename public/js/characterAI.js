@@ -2,12 +2,15 @@ import CharacterAnimationsAgent from './characterAnimationsAgent.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
 
+    // We get the canvas where the character animations will be displayed
     const container = document.getElementById('canvas-container');
 
     if (!container) return;
 
+    // The character's animation agent is created, and the canvas is passed to it
     const characterAnimationsAgent = new CharacterAnimationsAgent(container);
 
+    // We obtain references to the DOM elements on the page
     const applyBtn = document.getElementById('apply-code-btn');
     const fileInput = document.getElementById('file-input');
     const nativeSelect = document.getElementById('animation-selector');
@@ -17,11 +20,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const optionsBox = document.getElementById('custom-options-box');    
     const selectModelElement = document.getElementById('model-selector'); 
     const selectAnimElement = document.getElementById('animation-selector'); 
+    const selectBonesElement = document.getElementById('bone-selector'); 
     const codeTextArea = document.getElementById('code-input');
     const toggleCodeCheckbox = document.getElementById('toggle-code-checkbox');
 
+
     try {
 
+        // Initialize the local database for storing character models
+        // It is initialized only once
         await characterAnimationsAgent.initDB();
 
         // We add the first option to the models dropdown menu
@@ -34,8 +41,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
 
+            // We retrieve the list of models from the database
             const models = await characterAnimationsAgent.getModelListFromDB();
 
+            // We populate the dropdown menu for the models
             models.forEach((item) => {
 
                 const option = document.createElement('option');
@@ -53,31 +62,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error("Could not initialize IndexedDB : ", err);
     }
 
-    if (selectModelElement) selectModelElement.value = "none";
+    // In the animation and bone dropdown menus, we indicate that a model must be selected.
     if (selectAnimElement) selectAnimElement.innerHTML = '<option value="">-- Select a model first --</option>';
+    if (selectBonesElement) selectBonesElement.innerHTML = '<option value="">-- Select a model first --</option>';
 
-    // EventListeners
-    // Upload a file input file element
+    // EventListeners...
     if (fileInput) {
 
+        // Upload a file input file element
         fileInput.addEventListener('change', async (event) => {
 
             const files = event.target.files;
             if (!files || files.length === 0) return;
 
+            // We take only the first of the uploaded files
             const file = files[0]; 
     
+            // We generate a unique key for the model we want to upload
             const timestamp = Date.now().toString(36); 
-            const uuidSguro = crypto.randomUUID();
-            const idUnico = `${timestamp}-${uuidSguro}`; 
-            const nameArchivo = file.name;
+            const uuidSecure = crypto.randomUUID();
+            const id = `${timestamp}-${uuidSecure}`; 
+            const filename = file.name;
 
             try {
 
-                await characterAnimationsAgent.initDB(); 
+                // We store the uploaded model in the local database
+                await characterAnimationsAgent.saveModelInDB(id, filename, file);
 
-                await characterAnimationsAgent.saveModelInDB(idUnico, nameArchivo, file);
-
+                // Load the models into the model dropdown menu
+                // Initially, add a first entry indicating that a model must be selected, but do not select it
                 selectModelElement.innerHTML = '';
                 const defaultOpt = document.createElement('option');
                 defaultOpt.value = "none";
@@ -86,19 +99,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 try {
 
-                    
+                    // We retrieve the list of models from the database
                     const models = await characterAnimationsAgent.getModelListFromDB();
 
-                    
+                    // We finish populating the models dropdown menu
                     models.forEach((item) => {
 
                         const option = document.createElement('option');
                         option.value = item.id;
                         option.textContent = item.name + " (Saved)";
             
-                        if (item.name === nameArchivo && nameArchivo !== '') {
-                            option.selected = true;
-                        }
+                        // We select the option that matches the name of the uploaded model
+                        if (item.name === filename && filename !== '') option.selected = true;
             
                         selectModelElement.appendChild(option);
                     });
@@ -113,35 +125,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             try {
 
-                const datosmodel = await characterAnimationsAgent.getModelBlobFromDB(idUnico);
-        
-                const resultadoanimations = characterAnimationsAgent.loadNewModelInScene(datosmodel.gltf);
+                // We populate the dropdown menus for the model's animations and bones by passing in the character's ID.
+                await fillAnimationsAndBones(id);   
+                
+                // We verify that the code provided by the user is correct
+                checkUserCode();
 
-                if (selectAnimElement) {
-
-                    selectAnimElement.innerHTML = '';
-
-                    if (resultadoanimations.animations.length > 0) {
-
-                        resultadoanimations.animations.forEach((nameClip) => {
-                            const option = document.createElement('option');
-                            option.value = nameClip;
-                            option.textContent = nameClip;
-                    
-                            if (nameClip === resultadoanimations.default) {
-                                option.selected = true;
-                            }
-                            selectAnimElement.appendChild(option);
-                        });
-
-                    } else {
-
-                        const option = document.createElement('option');
-                        option.value = "";
-                        option.textContent = "Without animations";
-                        selectAnimElement.appendChild(option);
-                    }
-                }
             } catch (error) {
                 console.error("Error in the model change flow : ", error);
             }
@@ -149,66 +138,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
 
-    // Selected a diferent model
     if (selectModelElement) {
 
+        // Selected a different model
         selectModelElement.addEventListener('change', async (event) => {
 
-            const idSeleccionado = event.target.value;
+            const id = event.target.value;
 
-            if (idSeleccionado === 'none') {
+            if (id === 'none') {
 
+                // If we do not select any model
                 characterAnimationsAgent.removeCharacter();
                 if (selectAnimElement) selectAnimElement.innerHTML = '<option value="">-- Select a model first --</option>';
+                if (selectBonesElement) selectBonesElement.innerHTML = '<option value="">-- Select a model first --</option>';
                 return;
 
             } else {
 
                 try {
 
-                    const datosmodel = await characterAnimationsAgent.getModelBlobFromDB(idSeleccionado);
-                    const resultadoanimations = characterAnimationsAgent.loadNewModelInScene(datosmodel.gltf);
-        
-                    if (selectAnimElement) {
+                    // We populate the dropdown menus for the model's animations and bones by passing in the character ID.
+                    await fillAnimationsAndBones(id);                  
 
-                        selectAnimElement.innerHTML = '';
+                    // We verify that the code provided by the user is correct
+                    checkUserCode();
 
-                        if (resultadoanimations.animations.length > 0) {
-
-                            resultadoanimations.animations.forEach((nameClip) => {
-
-                                const option = document.createElement('option');
-                                option.value = nameClip;
-                                option.textContent = nameClip;
-                    
-                                if (nameClip === 'Idle') {
-                                    option.selected = true;
-                                }
-                                selectAnimElement.appendChild(option);
-                            });
-
-                        } else {
-                            const option = document.createElement('option');
-                            option.value = "";
-                            option.textContent = "Without animations";
-                            selectAnimElement.appendChild(option);
-                        }
-                    }
-
-                    const userCode = codeTextArea.textContent;
-                    const esExitoso = characterAnimationsAgent.compileCustomCode(userCode);
-
-                    if (esExitoso) {
-                        codeTextArea.style.backgroundColor = '#e8f5e9';
-                        if (toggleCodeCheckbox) {
-                            toggleCodeCheckbox.disabled = false; 
-                        }
-                    } else {
-                        codeTextArea.style.backgroundColor = '#ffebee';
-                        if (toggleCodeCheckbox) {
-                            toggleCodeCheckbox.disabled = true; 
-                        }
-                    }
                 } catch (error) {
                     console.error("Error in the model change flow : ", error);
                 }
@@ -216,6 +170,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    
 
     // Animation selector changed
     if (selectAnimElement) {
@@ -227,25 +182,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // The validate code button has been clicked
     if (applyBtn) applyBtn.addEventListener('click', () => { 
-
-        applyBtn.disabled = true;
-        applyBtn.style.opacity = "0.5";
-        applyBtn.style.cursor = "not-allowed";
-
-        const userCode = codeTextArea.textContent;
-        const esExitoso = characterAnimationsAgent.compileCustomCode(userCode);
-
-        if (esExitoso) {
-            codeTextArea.style.backgroundColor = '#e8f5e9'; // Verde claro
-            if (toggleCodeCheckbox) {
-                toggleCodeCheckbox.disabled = false; 
-            }
-        } else {
-            codeTextArea.style.backgroundColor = '#ffebee'; // Rojo claro
-            if (toggleCodeCheckbox) {
-                toggleCodeCheckbox.disabled = true; 
-            }
-        }
+        checkUserCode();
     });
     
 
@@ -292,6 +229,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const h = container.clientHeight;
         characterAnimationsAgent.resize(w,h);
     });
+
+
+
+
+
 
     // This code is for the animations dropdown 
     // The select element is kept, but it is handled in a smart way
@@ -342,21 +284,115 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
+
+    async function fillAnimationsAndBones(id) {
+        
+        // We obtain the binary for the model we have selected
+        const datamodel = await characterAnimationsAgent.getModelBlobFromDB(id);
+
+        // We retrieve the animations for the selected model
+        const animations = characterAnimationsAgent.loadNewModelInScene(datamodel.gltf);
+                    
+        // We load the animations dropdown menu
+        if (selectAnimElement) {
+
+            selectAnimElement.innerHTML = '';
+
+            if (animations.animations.length > 0) {
+
+                animations.animations.forEach((nameClip) => {
+
+                    const option = document.createElement('option');
+                    option.value = nameClip;
+                    option.textContent = nameClip;
+                    
+                    // We select the one provided by default by the animation agent ('Idle')
+                    if (nameClip === animations.default) option.selected = true;
+
+                    selectAnimElement.appendChild(option);
+                            
+                });
+
+            } else {
+
+                // In the case that there are no animations
+                const option = document.createElement('option');
+                option.value = "";
+                option.textContent = "Without animations";
+                selectAnimElement.appendChild(option);
+            }
+        }
+
+        // Load the bone dropdown menu
+        if (selectBonesElement) {
+
+            selectBonesElement.innerHTML = '';
+
+            if (datamodel.bones.length > 0) {
+
+                datamodel.bones.forEach((bone) => {
+                    const option = document.createElement('option');
+                    option.value = bone;
+                    option.textContent = bone;
+                    selectBonesElement.appendChild(option);
+                });
+
+            } else {
+
+                // In the case that there is no bone at all
+                const option = document.createElement('option');
+                option.value = "";
+                option.textContent = "Without bones";
+                selectBonesElement.appendChild(option);
+            }
+        }
+    }    
+
+
+
+
+
+
+    function checkUserCode() {
+
+        // we verify the code provided by the user
+        const userCode = codeTextArea.textContent;
+        const isOk = characterAnimationsAgent.compileCustomCode(userCode);
+
+        if (isOk) {
+            codeTextArea.style.backgroundColor = '#e8f5e9';
+            if (toggleCodeCheckbox) toggleCodeCheckbox.disabled = false; 
+            applyBtn.disabled = true;
+            applyBtn.style.opacity = "0.5";
+            applyBtn.style.cursor = "not-allowed";
+        } else {
+            codeTextArea.style.backgroundColor = '#ffebee';
+            if (toggleCodeCheckbox) toggleCodeCheckbox.disabled = true; 
+        }
+
+    }
+
+
+
+
+
+
+
     // This code block defines and executes the main animation loop (also known as a game loop or render loop) 
     // for the 3D application. Its purpose is to update the logic, handle any potential errors, and continuously 
     // redraw the screen at the maximum speed allowed by the monitor (typically 60 or 90 times per second).
     function animate(timestamp) { 
 
         // The most important native browser function for animations. It tells the browser: 
-        // "As soon as you are ready to paint the next frame, run the animate function again."
+        // As soon as you are ready to paint the next frame, run the animate function again.
         requestAnimationFrame(animate);
 
         // It is specified whether to execute the custom code or the animation
-        const ejecutarCodigoPersonalizado = toggleCodeCheckbox && toggleCodeCheckbox.checked;
-        const ejecucionExitosa = characterAnimationsAgent.tick(timestamp, ejecutarCodigoPersonalizado);
+        const executeCode = toggleCodeCheckbox && toggleCodeCheckbox.checked;
+        const isOk = characterAnimationsAgent.tick(timestamp, executeCode);
 
         // If you cannot execute the code...
-        if (!ejecucionExitosa) {        
+        if (!isOk) {        
             if (toggleCodeCheckbox) toggleCodeCheckbox.checked = false;
             if (codeTextArea) codeTextArea.style.backgroundColor = '#ffebee';
         }

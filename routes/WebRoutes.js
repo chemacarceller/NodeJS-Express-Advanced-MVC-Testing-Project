@@ -25,7 +25,10 @@ const audioanalyzerAIRouter = require('./AudioAnalyzerAIRoute');
 router.use('/audioanalyzerAI', audioanalyzerAIRouter); 
 
 const characterAIRouter = require('./CharacterAIRoute');
-router.use('/characterAI', characterAIRouter); 
+router.use('/characterAI', characterAIRouter);
+
+const lightbulbAIRouter = require('./LightBulbAIRoute');
+router.use('/lightbulbAI', lightbulbAIRouter);
 
 // The home route is handled via indexController.start
 const homeController = new HomeController();
