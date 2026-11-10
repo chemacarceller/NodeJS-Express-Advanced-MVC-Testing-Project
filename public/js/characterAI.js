@@ -1,7 +1,5 @@
 import CharacterAnimationsAgent from './characterAnimationsAgent.js';
 
-
-
 document.addEventListener('DOMContentLoaded', async () => {
 
     const container = document.getElementById('canvas-container');

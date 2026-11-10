@@ -62,6 +62,8 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use('/three', express.static(path.join(__dirname, 'node_modules/three')));
+
 // Loads and connects the main router (route aggregator from the routes folder)
 // The home route is managed via an WebRoutes.js file located within ./routes
 const WebRoutes = require('./routes/WebRoutes');
