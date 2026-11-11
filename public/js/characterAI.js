@@ -381,7 +381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // This code block defines and executes the main animation loop (also known as a game loop or render loop) 
     // for the 3D application. Its purpose is to update the logic, handle any potential errors, and continuously 
     // redraw the screen at the maximum speed allowed by the monitor (typically 60 or 90 times per second).
-    function animate(timestamp) { 
+    function animate(timestamp = performance.now()) { 
 
         // The most important native browser function for animations. It tells the browser: 
         // As soon as you are ready to paint the next frame, run the animate function again.
@@ -405,5 +405,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         characterAnimationsAgent.render();
     }
 
-    animate(0);
+    requestAnimationFrame(animate);
 });
