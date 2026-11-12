@@ -78,10 +78,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             // We take only the first of the uploaded files
             const file = files[0]; 
     
-            // We generate a unique key for the model we want to upload
-            const timestamp = Date.now().toString(36); 
-            const uuidSecure = crypto.randomUUID();
-            const id = `${timestamp}-${uuidSecure}`; 
+            // We generate the timestamp in base 36
+            const timestamp = Date.now().toString(36);
+
+            // We generate 8 random characters (letters and numbers)
+            const randomChars = Math.random().toString(36).substring(2, 10);
+
+            const id = `${timestamp}-${randomChars}`;
             const filename = file.name;
 
             try {
@@ -220,6 +223,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+
+    selectBonesElement.addEventListener('change', (event) => {
+        const boneName = event.target.value;
+        characterAnimationsAgent.remarkBone(boneName);
+    });
 
 
     // Adjustments are made if the window is resized

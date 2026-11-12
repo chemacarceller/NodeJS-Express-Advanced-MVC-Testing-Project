@@ -59,6 +59,19 @@ export default class CharacterAnimationsAgent {
         directionalLight.position.set(5, 12, 8);
         this.scene.add(directionalLight);
 
+        this.boneMarker = new THREE.Group();
+        this.boneMarker.renderOrder = 999;
+
+        const sphereGeo = new THREE.SphereGeometry(2, 16, 16);
+        const sphereMat = new THREE.MeshBasicMaterial({ color: 0xff0000, depthTest: false });
+        this.boneMarker.add(new THREE.Mesh(sphereGeo, sphereMat));
+
+        const axes = new THREE.AxesHelper(0.15);
+        axes.material.depthTest = false;
+        this.boneMarker.add(axes);
+
+        this.boneLines = new THREE.Group();
+        this.boneMarker.add(this.boneLines);
     }
 
 
@@ -453,6 +466,36 @@ export default class CharacterAnimationsAgent {
         nextAction.reset().play();
         if (this.activeAction) this.activeAction.crossFadeTo(nextAction, 0.5, true);
         this.activeAction = nextAction;
+    }
+
+
+    // Function used to highlight a bone in the model's skeleton
+    remarkBone(boneName='') {
+
+        this.boneMarker.removeFromParent();
+        
+        this.boneLines.clear();
+
+        if (!boneName) return;
+
+        const bone = this.characterModel.getObjectByName(boneName);
+        if (!bone) return;
+
+        const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000, depthTest: false });
+
+        bone.children.forEach((child) => {
+            if (child.isBone) {
+                const points = [
+                    new THREE.Vector3(0, 0, 0),
+                    child.position.clone()
+                ];
+                const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+                const line = new THREE.Line(lineGeo, lineMat);
+                this.boneLines.add(line);
+            }
+        });
+
+        bone.add(this.boneMarker);
     }
 
 
