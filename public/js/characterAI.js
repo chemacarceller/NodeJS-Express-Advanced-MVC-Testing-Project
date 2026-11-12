@@ -336,6 +336,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             selectBonesElement.innerHTML = '';
 
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = "none";
+            defaultOpt.textContent = "-- Select a bone... --";
+            selectBonesElement.appendChild(defaultOpt);
+
+            const allOpt = document.createElement('option');
+            allOpt.value = "all";
+            allOpt.textContent = "ALL Bones selected";
+            selectBonesElement.appendChild(allOpt);
+
+
             if (datamodel.bones.length > 0) {
 
                 datamodel.bones.forEach((bone) => {

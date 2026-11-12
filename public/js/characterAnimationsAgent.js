@@ -470,18 +470,51 @@ export default class CharacterAnimationsAgent {
 
 
     // Function used to highlight a bone in the model's skeleton
-    remarkBone(boneName='') {
+        // Function used to highlight a bone in the model's skeleton
+    remarkBone(boneName = 'none') {
 
         this.boneMarker.removeFromParent();
-        
+    
+        if (this.allBoneLines) this.allBoneLines.forEach(line => line.removeFromParent());
+        this.allBoneLines = [];
+
+        if (this.allBoneMarkers) this.allBoneMarkers.forEach(marker => marker.removeFromParent());
+        this.allBoneMarkers = [];
+
         this.boneLines.clear();
 
-        if (!boneName) return;
+        if (!boneName || boneName === 'none') return;
+
+        const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000, depthTest: false });
+
+        if (boneName === 'all') {
+            this.characterModel.traverse((obj) => {
+                if (obj.isBone) {
+                    const markerClone = this.boneMarker.clone();
+                    markerClone.scale.setScalar(0.4); 
+                    obj.add(markerClone);
+                    this.allBoneMarkers.push(markerClone);
+
+                    obj.children.forEach((child) => {
+                        if (child.isBone) {
+                            const points = [
+                                new THREE.Vector3(0, 0, 0),
+                                child.position.clone()
+                            ];
+                            const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+                            const line = new THREE.Line(lineGeo, lineMat);
+                            
+                            obj.add(line);
+                            this.allBoneLines.push(line);
+                        }
+                    });
+                }
+            });
+            return;
+        }
 
         const bone = this.characterModel.getObjectByName(boneName);
         if (!bone) return;
-
-        const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000, depthTest: false });
 
         bone.children.forEach((child) => {
             if (child.isBone) {
@@ -494,9 +527,10 @@ export default class CharacterAnimationsAgent {
                 this.boneLines.add(line);
             }
         });
-
         bone.add(this.boneMarker);
     }
+
+
 
 
 
