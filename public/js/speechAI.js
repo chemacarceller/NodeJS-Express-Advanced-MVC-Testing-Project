@@ -58,9 +58,13 @@ async function init() {
         if (data.status === 'expired') {
             clearInterval(sessionExpiredTimeoutSpeechAI);
             sessionStorage.clear();
+            if (window.handleBeforeUnload) window.removeEventListener('beforeunload', window.handleBeforeUnload);
+            window.onbeforeunload = null; 
             window.location.href = `/force-error?msg=${encodeURIComponent(data.msg)}`;
         }
       } catch (error) {
+        if (window.handleBeforeUnload) window.removeEventListener('beforeunload', window.handleBeforeUnload);
+        window.onbeforeunload = null; 
         window.location.href = `/force-error?msg=${encodeURIComponent(error.message)}`;
       }
     }, timeoutMs);

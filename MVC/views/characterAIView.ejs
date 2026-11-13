@@ -23,8 +23,8 @@
                 <div id="canvas-container" style="width: 100%; flex-grow: 1; background-color: #000;"></div>
                 <div style="width: 100%; display: flex; gap: 10px; padding: 15px; box-sizing: border-box; background-color: #222; border-top: 2px solid #333; align-items: stretch;">
                     <textarea id="ai-prompt-input" 
-                    style="flex-grow: 1; height: 100px; padding: 10px; resize: none; border-radius: 4px; border: 1px solid #222; background-color: #ddd; color: white; font-family: sans-serif; box-sizing: border-box;" 
-                    placeholder="Ej: Levanta el brazo izquierdo o saluda con la mano derecha..."></textarea>
+                    style="flex-grow: 1; height: 100px; padding: 10px; resize: none; border-radius: 4px; border: 1px solid #222; background-color: #ddd; color: #111; font-family: sans-serif; box-sizing: border-box;" 
+                    placeholder="E.g., Raise your left arm or wave with your right hand..."></textarea>
             
                     <div style="display: flex; flex-direction: column; gap: 10px; justify-content: space-between; width: 120px;">
                         <button id="send-ai-btn" 
@@ -38,47 +38,62 @@
                     </div>
                 </div>
             </div>
+
             <div style="width: 50%; height: 100%; display: flex; flex-direction: column; gap: 15px; padding: 20px; box-sizing: border-box; background-color: #f5f5f5; overflow-y: auto;">                
                 <div style="display: flex; gap: 10px; width: 100%;">
-                    <div style="flex: 1; display: flex; flex-direction: column; gap: 5px;">
+                    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px;">
                         <label for="file-input" style="font-weight: bold;">Upload new model (.glb):</label>
                         <input type="file" id="file-input" accept=".glb" style="padding: 8px; border: 1px dashed #666; border-radius: 4px; background: white; cursor: pointer; width: 100%; box-sizing: border-box;">
                     </div>
-                    <div style="flex: 1; display: flex; flex-direction: column; gap: 5px;">
+                    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px;">
+                        <label for="js-file-input" style="font-weight: bold;">Upload Character JS Code Animations:</label>
+                        <input type="file" disabled id="js-file-input" accept=".js" style="padding: 8px; border: 1px dashed #666; border-radius: 4px; background: white; cursor: pointer; width: 100%; box-sizing: border-box;">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; width: 100%;">
+                    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px;">
+                        <label for="model-selector" style="font-weight: bold;">Active Character:</label>
+                        <select id="model-selector" style="padding: 8px; width: 100%; height: 38px; border-radius: 4px; border: 1px solid #ccc; background: white; box-sizing: border-box;">
+                            <option value="none" selected>-- Select a model... --</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px;">
                         <label for="bone-selector" style="font-weight: bold;">Character Bones:</label>
                         <select id="bone-selector" style="padding: 8px; width: 100%; height: 38px; border-radius: 4px; border: 1px solid #ccc; background: white; box-sizing: border-box;">
                             <option value="none" selected>-- Select a model first ... --</option>                            
                         </select>
                     </div>
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <label for="model-selector" style="font-weight: bold;">Active Character : </label>
-                    <select id="model-selector" style="padding: 8px; width: 100%;">
-                        <option value="none" selected>-- Select a model... --</option>
-                    </select>
-                </div>
-                <div id="container2" style="display: flex; flex-direction: column; gap: 5px; position: relative;">
-    <label style="font-weight: bold;">Select an animation : </label>
-    
-    <!-- Este es el contenedor que resolverá el problema del espacio -->
-    <div class="custom-select-wrapper" id="custom-select-wrapper">
-        <div class="custom-select-trigger" id="custom-trigger">
-            <span id="custom-selected-text">-- Select an animation... --</span>
-            <span>▼</span>
-        </div>
-        <div class="custom-select-options" id="custom-options-box">
-            <!-- Las opciones se generarán aquí solas mediante el script "vigilante" -->
-        </div>
-    </div>
 
-    <!-- Tu select original se queda aquí, pero oculto para que no estorbe la pantalla -->
-    <select id="animation-selector" style="display: none;"></select>
-</div>
+                <div style="display: flex; gap: 10px; width: 100%;">
+                    <div id="container2" style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; position: relative;">
+                        <label style="font-weight: bold;">Select an animation:</label>
+                        <div class="custom-select-wrapper" id="custom-select-wrapper" style="width: 100%;">
+                            <div class="custom-select-trigger" id="custom-trigger">
+                                <span id="custom-selected-text">-- Select a model first ... --</span>
+                                <span>▼</span>
+                            </div>
+                            <div class="custom-select-options" id="custom-options-box">
+                            </div>
+                        </div>
+                        <select id="animation-selector" style="display: none;"></select>
+                    </div>
+
+                    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px;">
+                        <label for="js-animation-selector" style="font-weight: bold;">Select JS Animation:</label>
+                        <select id="js-animation-selector" style="padding: 8px; width: 100%; height: 38px; border-radius: 4px; border: 1px solid #ccc; background: white; box-sizing: border-box;">
+                            <option value="none" selected>-- Select a model first ... --</option>
+                        </select>
+                    </div>
+                </div>
                 <div style="display: flex; flex-direction: column; flex-grow: 1;">
                     <label for="code-input" style="font-weight: bold; margin-bottom: 5px;">
                         Programming Movement (JS) :
                     </label>
-                    <textarea id="code-input" style="width: 100%; flex-grow: 1; font-family: monospace; padding: 10px; resize: none; box-sizing: border-box;" placeholder="// Escribe código aquí...&#10;// Ejemplo:&#10;model.rotation.y = Math.sin(time * 2);">model.rotation.y = Math.sin(time * 2);</textarea>
+                    <textarea id="code-input" style="width: 100%; flex-grow: 1; font-family: monospace; padding: 10px; resize: none; box-sizing: border-box;" placeholder="// Write code here...
+// Example:
+model.rotation.y = Math.sin(time * 2);"></textarea>
     
                     <button id="apply-code-btn" style="margin-top: 10px; width: 100%; padding: 12px; cursor: pointer; font-weight: bold; background-color: #333; color: white; border: none; border-radius: 4px;">
                         Validate Code Modifications
@@ -91,6 +106,7 @@
                         </label>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>

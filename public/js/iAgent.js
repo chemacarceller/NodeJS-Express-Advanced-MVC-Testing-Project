@@ -7,6 +7,8 @@ export default class IAgent {
     // Private function responsible for displaying the screen with the error message and clearing sessionStorage
     #errorHandler = async (message) => {
         sessionStorage.clear();
+        if (window.handleBeforeUnload) window.removeEventListener('beforeunload', window.handleBeforeUnload);
+        window.onbeforeunload = null; 
         window.location.href = `/force-error?msg=${encodeURIComponent(message)}`;
         return;
     };

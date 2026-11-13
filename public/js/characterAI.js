@@ -346,6 +346,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             allOpt.textContent = "ALL Bones selected";
             selectBonesElement.appendChild(allOpt);
 
+            console.log(datamodel.bones);
 
             if (datamodel.bones.length > 0) {
 
@@ -375,7 +376,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function checkUserCode() {
 
         // we verify the code provided by the user
-        const userCode = codeTextArea.textContent;
+        const userCode = codeTextArea.value;
         const isOk = characterAnimationsAgent.compileCustomCode(userCode);
 
         if (isOk) {

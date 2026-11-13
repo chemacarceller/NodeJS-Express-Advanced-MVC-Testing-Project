@@ -62,9 +62,11 @@ export default class CharacterAnimationsAgent {
         this.boneMarker = new THREE.Group();
         this.boneMarker.renderOrder = 999;
 
-        const sphereGeo = new THREE.SphereGeometry(2, 16, 16);
+        const sphereGeo = new THREE.SphereGeometry(0.015, 16, 16);
         const sphereMat = new THREE.MeshBasicMaterial({ color: 0xff0000, depthTest: false });
-        this.boneMarker.add(new THREE.Mesh(sphereGeo, sphereMat));
+        this.sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
+        this.boneMarker.add(this.sphereMesh);
+
 
         const axes = new THREE.AxesHelper(0.15);
         axes.material.depthTest = false;
@@ -72,6 +74,10 @@ export default class CharacterAnimationsAgent {
 
         this.boneLines = new THREE.Group();
         this.boneMarker.add(this.boneLines);
+
+        this.bones = {}
+
+        this.customStartTime = null;
     }
 
 
@@ -269,7 +275,7 @@ export default class CharacterAnimationsAgent {
     }
 
 
-    // Changes the character model in the scene
+// Changes the character model in the scene
     // If the scene is not provided—which is the usual case—it uses the scene `this.scene`.
     loadNewModelInScene(gltf, sceneInstance) {
     
@@ -296,7 +302,25 @@ export default class CharacterAnimationsAgent {
 
         this.activeGltfCache = gltf;
         this.characterModel = gltf.scene;
+
+        this.characterModel.traverse((child) => {
+            if (child.isBone) {
+                this.bones[child.name] = child;
+            }
+        });
+
+
+        // 1. Medir la altura original y escalar a exactamente 1.80m
+        const initialBox = new THREE.Box3().setFromObject(this.characterModel);
+        const size = initialBox.getSize(new THREE.Vector3());
+
+        if (size.y > 0) {
+            const targetHeight = 1.80;
+            const scaleFactor = targetHeight / size.y;
+            this.characterModel.scale.multiplyScalar(scaleFactor);
+        }
     
+        // 2. Recalcular la caja con el nuevo tamaño para centrar y apoyar en el suelo
         const box = new THREE.Box3().setFromObject(this.characterModel);
         const center = box.getCenter(new THREE.Vector3());
     
@@ -304,7 +328,6 @@ export default class CharacterAnimationsAgent {
         this.characterModel.position.z = -center.z;
         this.baseHeight = -box.min.y; 
         this.characterModel.position.y = this.baseHeight; 
-    
 
         sceneToUse.add(this.characterModel);
 
@@ -345,7 +368,6 @@ export default class CharacterAnimationsAgent {
         };
     }
 
-
     // Check that the code provided by the user is correct
     compileCustomCode(userCode) {
 
@@ -355,7 +377,7 @@ export default class CharacterAnimationsAgent {
         }
 
         try {
-            this.customMovementFn = new Function('model', 'time', 'baseHeight', 'THREE', userCode);
+            this.customMovementFn = new Function('model', 'bones', 'time', 'delta', 'baseHeight', 'THREE', userCode);
             return true;
         } catch (err) {
             console.error("Error compiling the user's dynamic code : ", err);
@@ -440,9 +462,15 @@ export default class CharacterAnimationsAgent {
         const elapsedTime = CharacterAnimationsAgent.timer.getElapsed(); 
 
         if (useCustomCode) {
+
             if (this.characterModel && this.customMovementFn) {
-                try {
-                    this.customMovementFn(this.characterModel, elapsedTime, this.baseHeight, THREE);
+
+                if (this.customStartTime === null) this.customStartTime = elapsedTime;
+
+                const customTime = elapsedTime - this.customStartTime;
+
+                try {              
+                    this.customMovementFn(this.characterModel, this.bones, customTime, delta, this.baseHeight, THREE);
                 } catch (err) {
                     console.error("Runtime error in user code : ", err);
                     this.customMovementFn = null; 
@@ -450,11 +478,12 @@ export default class CharacterAnimationsAgent {
                 }
             }
         } else {
-            if (this.mixer) {
-                this.mixer.update(delta);
-            }
-        }
 
+            this.customStartTime = null;
+
+            if (this.mixer) this.mixer.update(delta);
+        }
+        
         return true;
     }
 
@@ -470,7 +499,7 @@ export default class CharacterAnimationsAgent {
 
 
     // Function used to highlight a bone in the model's skeleton
-        // Function used to highlight a bone in the model's skeleton
+    // Function used to highlight a bone in the model's skeleton
     remarkBone(boneName = 'none') {
 
         this.boneMarker.removeFromParent();
@@ -485,17 +514,38 @@ export default class CharacterAnimationsAgent {
 
         if (!boneName || boneName === 'none') return;
 
+
+        // Buscar el primer hueso del esqueleto para leer la escala interna del rig
+        let referenceBone = null;
+        this.characterModel.traverse((bone) => {
+            if (!referenceBone && bone.isBone) referenceBone = bone;
+        });
+
+        if (referenceBone && this.sphereMesh) {
+
+            const boneWorldScale = new THREE.Vector3();
+            referenceBone.getWorldScale(boneWorldScale);
+
+            this.sphereMesh.scale.set(
+                1 / Math.abs(boneWorldScale.x || 1),
+                1 / Math.abs(boneWorldScale.y || 1),
+                1 / Math.abs(boneWorldScale.z || 1)
+            );
+        }
+
         const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000, depthTest: false });
 
         if (boneName === 'all') {
-            this.characterModel.traverse((obj) => {
-                if (obj.isBone) {
+
+            this.characterModel.traverse((bone) => {
+
+                if (bone.isBone) {
+
                     const markerClone = this.boneMarker.clone();
-                    markerClone.scale.setScalar(0.4); 
-                    obj.add(markerClone);
+                    bone.add(markerClone);
                     this.allBoneMarkers.push(markerClone);
 
-                    obj.children.forEach((child) => {
+                    bone.children.forEach((child) => {
                         if (child.isBone) {
                             const points = [
                                 new THREE.Vector3(0, 0, 0),
@@ -504,7 +554,7 @@ export default class CharacterAnimationsAgent {
                             const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
                             const line = new THREE.Line(lineGeo, lineMat);
                             
-                            obj.add(line);
+                            bone.add(line);
                             this.allBoneLines.push(line);
                         }
                     });
@@ -527,6 +577,7 @@ export default class CharacterAnimationsAgent {
                 this.boneLines.add(line);
             }
         });
+
         bone.add(this.boneMarker);
     }
 

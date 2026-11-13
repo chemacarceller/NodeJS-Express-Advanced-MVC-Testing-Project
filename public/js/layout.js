@@ -54,8 +54,8 @@ document.addEventListener('click', (event) => {
     }
 });
 
-// Used in desktop environments to notify when a tab or browser is being closed.
-window.addEventListener('beforeunload', (event) => { 
+
+window.handleBeforeUnload = (event) => { 
     
     // If we are arriving from internal navigation
     if (isInternalNavidation) return;
@@ -66,12 +66,16 @@ window.addEventListener('beforeunload', (event) => {
     event.returnValue = ''; 
 
     // If we continue, we proceed to pagehide...
-});
+};
+window.addEventListener('beforeunload', window.handleBeforeUnload);
 
+// Used in desktop environments to notify when a tab or browser is being closed.
 window.addEventListener('pagehide', () => {
 
     // If we are arriving from internal navigation
     if (isInternalNavidation) return;
+
+    if (window.location.pathname === '/force-error') return;
 
     // Since the user has already agreed to reload/exit in the previous step, 
     // we can now safely send the notification to Node.js
