@@ -40,8 +40,14 @@ const THIS_HOST = process.env.THIS_HOST || '127.0.0.1';
 const THIS_PORT = process.env.THIS_PORT || '4501';
 const THIS_URL = `http://${THIS_HOST}:${THIS_PORT}`; 
 
+const allowedOrigins = [...new Set([
+    `http://localhost:${THIS_PORT}`,
+    `http://127.0.0.1:${THIS_PORT}`,
+    THIS_URL
+])];
+
 app.use(cors({
-    origin: ['http://localhost:4501', `${THIS_URL}`],
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));

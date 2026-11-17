@@ -4,15 +4,19 @@
  * Module dependencies.
  */
 
+// Loads environment variables from a secret file named .env into the Node.js process.env object
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+
 var app = require('../app');
-var debug = require('debug')('mi-servidor:server');
+var debug = require('debug')('AMNV:server');
 var http = require('http');
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '4501');
+var port = normalizePort(process.env.THIS_PORT || '4503');
 app.set('port', port);
 
 /**
