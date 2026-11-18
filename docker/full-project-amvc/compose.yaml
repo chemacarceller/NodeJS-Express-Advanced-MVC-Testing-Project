@@ -1,0 +1,11 @@
+name: amvc-project
+services: 
+  amvc:
+    build:
+      context: ../..
+      dockerfile: docker/full-project-amvc/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "4501:4501"
+    env_file:
+      - ../../.env

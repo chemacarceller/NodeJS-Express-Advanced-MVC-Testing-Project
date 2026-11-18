@@ -129,14 +129,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       case ('es-ES') : targetLanguage = 'spanish'; break
       case ('fr-FR') : targetLanguage = 'french'; break
       case ('de-DE') : targetLanguage = 'german'; break
-      case ('en-EN') : targetLanguage = 'english'; break
+      case ('en-US') : targetLanguage = 'english'; break
     }
 
 // We define the wrapper message for the actual message
 const promptWrapper = `TASK: Translate the following text.
 TARGET LANGUAGE: ${targetLanguage}
 CRITICAL RULE: Output ONLY the direct translation. Do not reply, do not explain, do not add introductory text, and do not repeat the input if it matches the target language.
-ORIGINAL TEXT: "{{message}}"
+ORIGINAL TEXT: {{message}}
 TRANSLATION:`;
 
     // We make the request by sending the message, receive the response, and add a space to it 

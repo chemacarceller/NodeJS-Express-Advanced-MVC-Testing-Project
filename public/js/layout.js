@@ -91,32 +91,3 @@ window.addEventListener('pagehide', () => {
         navigator.sendBeacon(url, blob);
     }
 });
-
-
-
-
-
-// This code is not necessary for desktop browsers.
-// It is only required for mobile browsers when the browser is closed, as 'beforeunload' does not function in a mobile environment.
-// Unfortunately, this only works for closing the browser itself; closing a tab on mobile must be handled by the server via an automatic closure process.
-document.addEventListener('visibilitychange', () => {
-
-    if (isInternalNavidation) return;
-
-    if (document.visibilityState === 'hidden'  && activeSessionIds.length > 0) {
-
-        fillActiveSessionIds();
-
-        const url = '/api/client/closure-notify';
-        const data = JSON.stringify({ event: 'browser_exit', activeSessionIds });
-        
-        // We use a Blob so that Express detects it as legitimate JSON
-        const blob = new Blob([data], { type: 'application/json' });
-        
-        // sendBeacon hands control over to the browser's operating system, ensuring the data is sent
-        if (!alreadyNotify) { 
-            alreadyNotify = true;
-            navigator.sendBeacon(url, blob);
-        }
-    }
-});
