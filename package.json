@@ -3,11 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env DEBUG=mi-servidor:* node --watch ./bin/www",
+    "dev": "cross-env DEBUG=AMVC_Testing:* node --watch ./bin/www",
     "logs": "pm2 logs AMVC_Testing", 
     "stop": "pm2 stop AMVC_Testing",
     "restart": "cross-env NODE_ENV=production pm2 restart AMVC_Testing --update-env",
-    "start": "cross-env NODE_ENV=production pm2 start ./bin/www --name \"AMVC_Testing\""
+    "start": "cross-env NODE_ENV=production pm2 start ./bin/www --name AMVC_Testing"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
@@ -20,7 +20,6 @@
     "http-errors": "~1.6.3",
     "mongoose": "^9.10.1",
     "morgan": "^1.12.1",
-    "ollama": "^0.6.4",
     "pug": "^3.0.4",
     "say": "^0.16.0",
     "three": "^0.187.0"
