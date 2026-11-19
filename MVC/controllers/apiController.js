@@ -1,10 +1,34 @@
 // List of services to import for handling AJAX requests
 const UserService = require('../services/userService');
 const say = require('say');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
 const HOST_IAGENT = process.env.HOST_IAGENT || '127.0.0.1';
 const PORT_IAGENT = process.env.PORT_IAGENT || '4500';
 const PRIVATE_AGENT_URL = `http://${HOST_IAGENT}:${PORT_IAGENT}/api`; 
+
+const UPLOAD_DIR = path.resolve('uploads');
+
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+
+async function cleanPreviousUploads(currentFilename) {
+    try {
+        const files = await fs.promises.readdir(UPLOAD_DIR);
+        for (const file of files) {
+            if (file !== currentFilename) {
+                const filePath = path.join(UPLOAD_DIR, file);
+                await fs.promises.unlink(filePath);
+                console.log(`Old file deleted : ${file}`);
+            }
+        }
+    } catch (error) {
+        console.error('Error al limpiar archivos antiguos:', error);
+    }
+}
+
+
 
 // Controller class that handles all AJAX requests
 class ApiController {
@@ -389,6 +413,45 @@ class ApiController {
         } catch (e) {
             return false;
         }
+    }
+
+    uploadAudioFile(req, res) {
+
+        const storage = multer.diskStorage({
+            destination: (req, file, cb) => {
+                cb(null, UPLOAD_DIR);
+            },
+            filename: (req, file, cb) => {
+                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+                cb(null, uniqueSuffix + path.extname(file.originalname));
+            }
+        });
+
+        const fileFilter = (req, file, cb) => {
+            if (file.mimetype.startsWith('audio/')) cb(null, true);
+            else cb(new Error('El archivo debe ser un formato de audio válido.'), false);
+        };
+
+        const upload = multer({
+            storage: storage,
+            fileFilter: fileFilter,
+            limits: { fileSize: 100 * 1024 * 1024 }
+        }).single('audioFile');
+
+        upload(req, res, async (err) => {
+            if (err instanceof multer.MulterError) return res.status(400).json({ error: `Upload error : ${err.message}` });
+            else if (err) return res.status(400).json({ error: err.message });
+
+            if (!req.file) return res.status(400).json({ error: 'No file was uploaded' });
+
+            await cleanPreviousUploads(req.file.filename);
+
+            return res.status(200).json({
+                message: 'Audio uploaded successfully',
+                archivo: req.file.filename,
+                ruta: req.file.path
+            });
+        });
     }
 
 }

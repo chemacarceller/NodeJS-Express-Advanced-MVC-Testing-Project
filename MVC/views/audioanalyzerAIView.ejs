@@ -3,3 +3,40 @@
 <script type="module" src="js/audioanalyzerAI.js"></script>
 <%- contentFor('body') %>
     <h2>Audio Analyzer AI</h2>
+<div class="au-layout-wrapper" id="auLayoutWrapper">
+  <div class="audio-uploader-widget">
+    <h3 class="au-title">Upload audio file</h3>
+    <p class="au-subtitle">MP3, WAV, OGG, M4A (Máx. 100 MB)</p>
+
+    <label for="audioInput" class="au-drop-zone" id="dropZone">
+      <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+      </svg>
+      <span>Click to select an audio file</span>
+      <small>or drag the file here</small>
+    </label>
+
+    <input type="file" id="audioInput" accept="audio/*" />
+
+    <div class="au-preview-box" id="previewBox">
+      <div class="au-file-name" id="fileName"></div>
+      <audio id="audioPreview" controls></audio>
+    </div>
+
+    <button type="button" class="au-btn" id="uploadBtn">Upload Audio</button>
+    <div class="au-status" id="status"></div>
+
+    <button type="button" class="au-btn au-btn-transcribe" id="transcribeBtn" style="display: none;">
+      Transcription
+    </button>
+  </div>
+
+  <div class="au-transcription-panel" id="transcriptionPanel">
+    <div class="au-panel-header">
+      <h3 class="au-title">Transcription</h3>
+      <button type="button" class="au-btn-copy" id="copyBtn">Copy text</button>
+    </div>
+    <textarea id="transcriptionText" placeholder="The audio transcription will appear here..."></textarea>
+  </div>
+
+</div>
