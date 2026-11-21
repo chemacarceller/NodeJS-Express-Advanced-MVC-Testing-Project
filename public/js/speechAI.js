@@ -40,7 +40,7 @@ async function init() {
     const sessionExpiredTimeoutSpeechAI = setInterval(async () => {
       try {
 
-        const response = await fetch('/api/client/expired-session-consult',{
+        const response = await fetch('/api/iagent/expired-session-consult',{
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId : speechAID })

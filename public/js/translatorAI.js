@@ -59,7 +59,7 @@ const parameters = {
     const sessionExpiredTimeoutSpeechAI = setInterval(async () => {
       try {
 
-        const response = await fetch('/api/client/expired-session-consult',{
+        const response = await fetch('/api/iagent/expired-session-consult',{
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId : translatorAID })
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       case ('es-ES') : targetLanguage = 'spanish'; break
       case ('fr-FR') : targetLanguage = 'french'; break
       case ('de-DE') : targetLanguage = 'german'; break
-      case ('en-US') : targetLanguage = 'english'; break
+      case ('en-EN') : targetLanguage = 'english'; break
     }
 
 // We define the wrapper message for the actual message

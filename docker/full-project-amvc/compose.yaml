@@ -9,3 +9,15 @@ services:
       - "4501:4501"
     env_file:
       - ../../.env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - whisper_cache:/root/.cache
+
+volumes:
+  whisper_cache:

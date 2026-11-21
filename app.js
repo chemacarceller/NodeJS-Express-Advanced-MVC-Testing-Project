@@ -79,6 +79,13 @@ app.use('/', WebRoutes);
 const ApiRoutes = require('./routes/ApiRoutes');
 app.use('/api', ApiRoutes); 
 
+const ApiIAgentRoutes = require('./routes/ApiIAgentRoutes');
+app.use('/api/iagent', ApiIAgentRoutes); 
+
+const ApiAudioScribeRoutes = require('./routes/ApiAudioScribeRoutes');
+app.use('/api/audioscribe', ApiAudioScribeRoutes); 
+
+
 // Servir tus archivos públicos habituales (CSS, imágenes, model.glb)
 app.use(express.static(path.join(__dirname, 'public')));
 

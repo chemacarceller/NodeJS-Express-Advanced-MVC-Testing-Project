@@ -1,4 +1,4 @@
-const URL_PROXY = `${window.location.origin}/api/client`;
+const URL_PROXY = `${window.location.origin}/api/iagent`;
 
 export default class IAgent {
 

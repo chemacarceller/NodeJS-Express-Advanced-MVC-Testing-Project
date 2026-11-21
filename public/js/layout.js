@@ -38,7 +38,7 @@ fillActiveSessionIds();
 // This is not yet implemented; as it stands, the session would be terminated, but the sessionStorage would not be cleared, which would eventually lead to errors.
 if (isReloading && activeSessionIds.length > 0) {
     if (config && config.F5_CLOSE_SESSION === 'false') { 
-        fetch('/api/client/closure-cancel', {
+        fetch('/api/iagent/closure-cancel', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ activeSessionIds })
@@ -85,7 +85,7 @@ window.addEventListener('pagehide', () => {
     // This is because there is some browser-side code that would cause the request to be sent twice when on desktop.
     if (activeSessionIds.length > 0 && !alreadyNotify) { 
         alreadyNotify = true;
-        const url = '/api/client/closure-notify';
+        const url = '/api/iagent/closure-notify';
         const data = JSON.stringify({ event: 'browser_exit', activeSessionIds });
         const blob = new Blob([data], { type: 'application/json' });
         navigator.sendBeacon(url, blob);

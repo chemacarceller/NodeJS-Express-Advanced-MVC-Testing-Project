@@ -1,4 +1,3 @@
-/* Contenedor aislado: solo afecta a lo que esté dentro de esta caja */
 .audio-uploader-widget {
   --au-primary: #4f46e5;
   --au-primary-hover: #4338ca;
@@ -16,9 +15,9 @@
   border: 1px solid #e5e7eb;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   text-align: center;
-  margin: 20px auto; /* Lo centra horizontalmente sin romper tu layout */
+  margin: 20px auto; 
   box-sizing: border-box;
-  font-family: inherit; /* Usa la misma tipografía que ya tiene tu web */
+  font-family: inherit; 
 }
 
 .audio-uploader-widget * {
@@ -165,7 +164,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Contenedor principal que gestiona el desplazamiento */
 .au-layout-wrapper {
   display: flex;
   justify-content: center;
@@ -179,13 +177,11 @@
   font-family: inherit;
 }
 
-/* Estado expandido al transcribir */
 .au-layout-wrapper.has-transcription {
   max-width: 1050px;
   gap: 24px;
 }
 
-/* Ajuste en la tarjeta izquierda para que no se encoja al abrirse la derecha */
 .au-layout-wrapper .audio-uploader-widget {
   margin: 0;
   flex: 0 0 440px;
@@ -193,7 +189,6 @@
   transition: all 0.45s ease;
 }
 
-/* Panel derecho (oculto con ancho 0 y opacidad 0 al inicio) */
 .au-transcription-panel {
   flex: 0 0 0;
   width: 0;
@@ -210,7 +205,6 @@
   box-sizing: border-box;
 }
 
-/* Panel derecho visible */
 .au-layout-wrapper.has-transcription .au-transcription-panel {
   flex: 1 1 auto;
   width: auto;
@@ -271,7 +265,6 @@
   background-color: #ffffff;
 }
 
-/* Adaptación para pantallas pequeñas (móviles/tablets) */
 @media (max-width: 850px) {
   .au-layout-wrapper.has-transcription {
     flex-direction: column;
