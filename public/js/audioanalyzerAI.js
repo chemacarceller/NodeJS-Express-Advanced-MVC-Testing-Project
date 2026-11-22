@@ -12,8 +12,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const statusText = document.getElementById('status');
     const transcriptionText = document.getElementById('transcriptionText');
     const copyBtn = document.getElementById('copyBtn');
+    const txtBtn = document.getElementById('txtBtn');
 
-    // We create the constant for making Audio Scribe requests
+    // We create the constant for making Audio Scribe requests endpoint up /api/audioscribe
     const URL_PROXY = `${window.location.origin}/api/audioscribe`;
 
     // Global variable, used in several event handler functions
@@ -21,6 +22,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // AddEventListeners...
 
+    // The function that handles the change event on the file input type is defined for uploading a file.
+    // Its function is to display a preview of the selected audio and reset the interface to prepare it before a new upload and transcription.
     if (fileInput) {
 
         fileInput.addEventListener('change', () => {
@@ -42,6 +45,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Implements drag and drop functionality over a specific area of ​​the page (dropZone),
+    // directly connecting it to the previous fileInput code so that both methods function exactly the same.
     if (dropZone) {
 
         dropZone.addEventListener('dragover', (e) => {
@@ -63,11 +68,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Handles the click on the upload button (uploadBtn), packaging the selected audio file
+    // and sending it via HTTP to the /upload-audio endpoint of the Node.js server (where Multer will receive it)
     if (uploadBtn) {
 
         uploadBtn.addEventListener('click', async () => {
 
             // Auxiliary function
+            // Updates an on-screen notification box (statusText) with the corresponding message
             function showStatus(message, type) {
                 statusText.textContent = message;
                 statusText.className = `au-status ${type}`;
@@ -110,6 +118,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+
+    // When you press the transcribe button (transcribeBtn), send the name of the uploaded file to the /transcribe endpoint of your backend.
+    // Wait for WhisperX to finish and display the clean dialog in the text area.
     if (transcribeBtn) {
 
         transcribeBtn.addEventListener('click', async () => {
@@ -121,6 +132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             transcribeBtn.disabled = true;
 
             try {
+
                 const response = await fetch(`${URL_PROXY}/transcribe`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -148,15 +160,108 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Allows the user to copy the entire transcript to the clipboard with a single click
+    // and provides temporary visual confirmation on the button itself.
     if (copyBtn) {
 
-        copyBtn.addEventListener('click', () => {
-            
+        const originalText = copyBtn.textContent;
+
+        copyBtn.addEventListener('click', async () => {
+
             if (!transcriptionText.value) return;
-            navigator.clipboard.writeText(transcriptionText.value);
-            const originalText = copyBtn.textContent;
-            copyBtn.textContent = '¡Copied!';
+
+            try {
+
+                if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(transcriptionText.value);
+                else {
+                    transcriptionText.select();
+                    transcriptionText.setSelectionRange(0, 99999); 
+                    const isOk = document.execCommand('copy');
+                    window.getSelection().removeAllRanges(); 
+
+                    if (!isOk) throw new Error('Failed execCommand');
+                }
+
+                copyBtn.textContent = '¡Copied!';
+                setTimeout(() => { copyBtn.textContent = originalText; }, 2000);
+
+            } catch (err) {
+                console.error('Error copying to clipboard : ', err);
+                copyBtn.textContent = 'Error';
+                setTimeout(() => { copyBtn.textContent = originalText; }, 2000);
+            }
+        });
+    }
+
+/*
+
+    // Alternative code if the execCommand method becomes unavailable in browsers at any point
+    // If the user is not in a secure, non-local environment, we will force them to press Ctrl+C
+    if (copyBtn) {
+    
+        const originalText = copyBtn.textContent;
+
+        copyBtn.addEventListener('click', async () => {
+
+            if (!transcriptionText.value) return;
+
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(transcriptionText.value);
+                copyBtn.textContent = '¡Copied!';
+            } else {
+            
+                transcriptionText.focus();
+                transcriptionText.select();
+                const copied = document['execCommand']?.('copy');
+
+                if (copied) {
+                    window.getSelection().removeAllRanges();
+                    copyBtn.textContent = '¡Copied!';
+                } else copyBtn.textContent = 'Press Ctrl+C';
+            }
+
             setTimeout(() => { copyBtn.textContent = originalText; }, 2000);
         });
     }
+
+*/
+
+    // Allows the user to generate a file with the entire transcript with a single click
+    // and provides temporary visual confirmation on the button itself.
+    if (txtBtn) {
+    
+        const originalText = txtBtn.textContent;
+
+        txtBtn.addEventListener('click', () => {
+
+            if (!transcriptionText.value) return;
+
+            try {
+
+                const baseName = fileInput.files.item(0)?.name.replace(/\.[^/.]+$/, '') || 'transcripcion';
+
+                const blob = new Blob([transcriptionText.value], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+            
+                a.href = url;
+                a.download = `${baseName}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                setTimeout(() => URL.revokeObjectURL(url), 100);
+
+                txtBtn.textContent = '¡Downloaded!';
+                setTimeout(() => { txtBtn.textContent = originalText; }, 2000);
+
+            } catch (err) {
+                console.error('Error generating the text file : ', err);
+                txtBtn.textContent = 'Error';
+                setTimeout(() => { txtBtn.textContent = originalText; }, 2000);
+            }
+        });
+    }
+
+
 });

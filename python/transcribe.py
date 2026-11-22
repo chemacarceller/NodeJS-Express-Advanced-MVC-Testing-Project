@@ -31,9 +31,21 @@ DEVICE = "cuda"
 MODEL_NAME = os.getenv("WHISPER_MODEL", "medium")
 COMPUTE_TYPE = os.getenv("WHISPER_COMPUTE", "float16")
 
+# • language (LANGUAGE). Forces the language of the audio (e.g., "es", "en").
+# If left as None, the model will detect the language automatically, although setting it speeds up the process and prevents errors in short audio clips.
+# • vad_method (VAD_METHOD). Selects the Voice Activity Detection engine
+# used to segment the audio before transcription. Supports "pyannote" (default) or "silero"
+# The main difference lies in the balance between conversational accuracy and speed/lightness:
+# pyannote offers greater accuracy in complex dialogues with multiple speakers and makes excellent use of the GPU,
+# while silero is much lighter, faster on the CPU, and does not require external permissions or tokens.
 LANGUAGE = "es"
 VAD_METHOD = "silero"
 
+# The batch_size parameter defines how many audio fragments the model processes simultaneously in parallel during each transcription step.
+# It does not affect transcription accuracy;
+# A higher batch_size (for example, 16 or 32) takes advantage of graphics card parallelism,
+# drastically increasing transcription speed (up to 70x faster than real-time).
+# The higher the batch_size, the more memory is consumed at once.
 BATCH_SIZE = 4
 
 
@@ -51,7 +63,7 @@ def main():
     audio_file_path = sys.argv[1]
 
     # Hugging Face token
-    hf_token = os.environ.get("HF_TOKEN", "TU_TOKEN_DE_HUGGING_FACE")
+    hf_token = os.environ.get("HF_TOKEN", "YOUR_HUGGING_FACE_TOKEN")
 
     try:
         # Load the WhisperX model

@@ -30,6 +30,9 @@ router.use('/characterAI', characterAIRouter);
 const lightbulbAIRouter = require('./LightBulbAIRoute');
 router.use('/lightbulbAI', lightbulbAIRouter);
 
+const myrubricAIRouter = require('./MyRubricAIRoute');
+router.use('/myrubricAI', myrubricAIRouter);
+
 // The home route is handled via indexController.start
 const homeController = new HomeController();
 router.get('/', homeController.start); 
