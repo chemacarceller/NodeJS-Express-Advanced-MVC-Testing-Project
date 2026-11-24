@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         dropZone.addEventListener('drop', (e) => {
+            if (isTranscribing) return;
             e.preventDefault();
             dropZone.classList.remove('dragover');
             if (e.dataTransfer.files.length) {
@@ -121,44 +122,91 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // When you press the transcribe button (transcribeBtn), send the name of the uploaded file to the /transcribe endpoint of your backend.
     // Wait for WhisperX to finish and display the clean dialog in the text area.
+    // Añade una bandera global en tu script para bloquear también el drag & drop si lo usas
+    let isTranscribing = false;
+
     if (transcribeBtn) {
 
         transcribeBtn.addEventListener('click', async () => {
 
-            if (!uploadedFileName) return;
+            if (!uploadedFileName || isTranscribing) return;
+
+            const myFileName = uploadedFileName.split(/[\\/]/).pop();
+
+            isTranscribing = true;
+            transcribeBtn.disabled = true;
+            if (fileInput) fileInput.disabled = true;
 
             layoutWrapper.classList.add('has-transcription');
             transcriptionText.value = 'Transcribing audio, please wait...';
-            transcribeBtn.disabled = true;
+
+            const fileInputEl = document.querySelector('input[type="file"]');
+            if (fileInputEl) {
+                fileInputEl.disabled = true;
+                if (fileInputEl.parentElement) fileInputEl.parentElement.style.pointerEvents = 'none';
+            }
+            if (typeof uploadBtn !== 'undefined' && uploadBtn) uploadBtn.disabled = true;
+
+            const transcribePromise = fetch(`${URL_PROXY}/transcribe`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: myFileName })
+            });
+
+            const checkStatus = async () => {
+                try {
+                    const res = await fetch(`${URL_PROXY}/status?t=${Date.now()}`, { cache: 'no-store' });
+                    if (!res.ok) return;
+
+                    const { activeFile } = await res.json();
+
+                    if (activeFile === myFileName) {
+                        transcriptionText.value = 'Transcribing audio, please wait...';
+                        clearInterval(statusInterval);
+                    } else if (activeFile) {
+                        transcriptionText.value = 'Queued, please wait...';
+                    }
+                } catch (_) {}
+            };
+
+            setTimeout(checkStatus, 250);
+            const statusInterval = setInterval(checkStatus, 1500);
 
             try {
-
-                const response = await fetch(`${URL_PROXY}/transcribe`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ filename: uploadedFileName })
-                });
-
+                const response = await transcribePromise;
                 const data = await response.json();
+
                 if (response.ok) { 
                     const rawText = data.transcription || data.text || 'Transcription completed.';
                     transcriptionText.value = rawText
-                    .replace(/\*\*/g, '')          
-                    .split(/\r?\n/)                
-                    .map(linea => linea.trim())    
-                    .filter(Boolean)               
-                    .join('\n');                   
+                        .replace(/\*\*/g, '')          
+                        .split(/\r?\n/)                
+                        .map(linea => linea.trim())    
+                        .filter(Boolean)               
+                        .join('\n');                   
+                } else {
+                    transcriptionText.value = `Error during transcription : ${data.error || 'Server failure'}`;
                 }
-                else transcriptionText.value = `Error during transcription : ${data.error || 'Server failure'}`;
-        
+
             } catch (error) {
                 transcriptionText.value = 'Connection error while attempting to transcribe the audio.';
                 console.error(error);
             } finally {
+
+                clearInterval(statusInterval);
+                isTranscribing = false;
                 transcribeBtn.disabled = false;
+
+                if (fileInputEl) {
+                    fileInputEl.disabled = false;
+                    if (fileInputEl.parentElement) fileInputEl.parentElement.style.pointerEvents = '';
+                }
+                if (typeof uploadBtn !== 'undefined' && uploadBtn) uploadBtn.disabled = false;
             }
         });
     }
+
+
 
     // Allows the user to copy the entire transcript to the clipboard with a single click
     // and provides temporary visual confirmation on the button itself.

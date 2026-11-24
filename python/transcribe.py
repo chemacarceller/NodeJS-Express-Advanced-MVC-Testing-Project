@@ -6,6 +6,7 @@ import pandas as pd
 import whisperx
 from pyannote.audio import Pipeline
 
+
 # device
 # • "cuda": Uses an NVIDIA graphics card. Recommended for better speed.
 # • "cpu": Uses the processor. Much slower; only ideal if you do not have a dedicated graphics card.
@@ -25,9 +26,12 @@ from pyannote.audio import Pipeline
 # • "float32": Full precision without compression. Consumes a large amount of memory and is slow; only useful if your older hardware fails with the other options.
 
 # The default configuration provided here is optimized for 4 GB of VRAM and geared toward translation.
-# For 4 GB, you should choose between this setup or "large-v3-turbo" with "int8_float16"
+# For 4 GB RTX, you should choose between this setup or "large-v3-turbo" with "int8_float16"
 # -> the latter is more efficient if you are working exclusively with Spanish
+
+# For 4GB GTX small - int8
 DEVICE = "cuda"
+
 MODEL_NAME = os.getenv("WHISPER_MODEL", "medium")
 COMPUTE_TYPE = os.getenv("WHISPER_COMPUTE", "float16")
 
