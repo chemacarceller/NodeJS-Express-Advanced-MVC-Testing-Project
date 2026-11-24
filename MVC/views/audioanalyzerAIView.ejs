@@ -2,7 +2,7 @@
 <%- contentFor('scripts') %>
 <script type="module" src="js/audioanalyzerAI.js"></script>
 <%- contentFor('body') %>
-    <h2>Audio Analyzer AI</h2>
+    <h2>Audio Analyzer AI Transcription Application</h2>
 <div class="au-layout-wrapper" id="auLayoutWrapper">
   <div class="audio-uploader-widget">
     <h3 class="au-title">Upload audio file</h3>
@@ -29,9 +29,13 @@
     <button type="button" class="au-btn au-btn-transcribe" id="transcribeBtn" style="display: none;">
       Transcription
     </button>
+
+    <button type="button" class="au-btn au-btn-abort" id="abortBtn" style="display: none;">
+      Cancel Transcription
+    </button>
   </div>
 
- <div class="au-transcription-panel" id="transcriptionPanel">
+  <div class="au-transcription-panel" id="transcriptionPanel">
     <div class="au-panel-header">
         <h3 class="au-title">Transcription</h3>
         <div class="au-panel-actions">
@@ -40,6 +44,5 @@
         </div>
     </div>
     <textarea id="transcriptionText" placeholder="The audio transcription will appear here..."></textarea>
-</div>
-
+  </div>
 </div>

@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const transcriptionText = document.getElementById('transcriptionText');
     const copyBtn = document.getElementById('copyBtn');
     const txtBtn = document.getElementById('txtBtn');
+    const abortBtn = document.getElementById('abortBtn');
 
     // We create the constant for making Audio Scribe requests endpoint up /api/audioscribe
     const URL_PROXY = `${window.location.origin}/api/audioscribe`;
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let uploadedFileName = null;
 
     // AddEventListeners...
+
 
     // The function that handles the change event on the file input type is defined for uploading a file.
     // Its function is to display a preview of the selected audio and reset the interface to prepare it before a new upload and transcription.
@@ -45,6 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+
     // Implements drag and drop functionality over a specific area of ​​the page (dropZone),
     // directly connecting it to the previous fileInput code so that both methods function exactly the same.
     if (dropZone) {
@@ -68,6 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
+
 
     // Handles the click on the upload button (uploadBtn), packaging the selected audio file
     // and sending it via HTTP to the /upload-audio endpoint of the Node.js server (where Multer will receive it)
@@ -122,8 +126,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // When you press the transcribe button (transcribeBtn), send the name of the uploaded file to the /transcribe endpoint of your backend.
     // Wait for WhisperX to finish and display the clean dialog in the text area.
-    // Añade una bandera global en tu script para bloquear también el drag & drop si lo usas
     let isTranscribing = false;
+    let currentAbortController = null;
+    let currentFileInQueue = null;
 
     if (transcribeBtn) {
 
@@ -132,25 +137,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!uploadedFileName || isTranscribing) return;
 
             const myFileName = uploadedFileName.split(/[\\/]/).pop();
+            currentFileInQueue = myFileName;
+            currentAbortController = new AbortController();
 
             isTranscribing = true;
             transcribeBtn.disabled = true;
             if (fileInput) fileInput.disabled = true;
 
+            if (abortBtn) {
+                abortBtn.style.display = 'inline-block';
+                abortBtn.disabled = false;
+            }
+
             layoutWrapper.classList.add('has-transcription');
+            
             transcriptionText.value = 'Transcribing audio, please wait...';
 
             const fileInputEl = document.querySelector('input[type="file"]');
-            if (fileInputEl) {
-                fileInputEl.disabled = true;
-                if (fileInputEl.parentElement) fileInputEl.parentElement.style.pointerEvents = 'none';
-            }
+            const dropZoneEl = document.getElementById('dropZone');
+            if (fileInputEl) fileInputEl.disabled = true;
+            if (dropZoneEl) dropZoneEl.style.pointerEvents = 'none';
             if (typeof uploadBtn !== 'undefined' && uploadBtn) uploadBtn.disabled = true;
 
             const transcribePromise = fetch(`${URL_PROXY}/transcribe`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ filename: myFileName })
+                body: JSON.stringify({ filename: myFileName }),
+                signal: currentAbortController.signal
             });
 
             const checkStatus = async () => {
@@ -162,6 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     if (activeFile === myFileName) {
                         transcriptionText.value = 'Transcribing audio, please wait...';
+                        if (abortBtn) abortBtn.style.display = 'none';
                         clearInterval(statusInterval);
                     } else if (activeFile) {
                         transcriptionText.value = 'Queued, please wait...';
@@ -189,23 +203,61 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
             } catch (error) {
-                transcriptionText.value = 'Connection error while attempting to transcribe the audio.';
-                console.error(error);
+                if (error.name === 'AbortError') {
+                    transcriptionText.value = 'Transcription cancelled by user.';
+                    transcribeBtn.style.display = 'none';
+                    uploadedFileName = null;
+                } else {
+                    transcriptionText.value = 'Connection error while attempting to transcribe the audio.';
+                    console.error(error);
+                }
             } finally {
 
                 clearInterval(statusInterval);
                 isTranscribing = false;
+                currentAbortController = null;
+                currentFileInQueue = null;
                 transcribeBtn.disabled = false;
 
-                if (fileInputEl) {
-                    fileInputEl.disabled = false;
-                    if (fileInputEl.parentElement) fileInputEl.parentElement.style.pointerEvents = '';
+                if (abortBtn) {
+                    abortBtn.style.display = 'none';
+                    abortBtn.disabled = false;
                 }
+
+                if (fileInputEl) fileInputEl.disabled = false;
+                if (dropZoneEl) dropZoneEl.style.pointerEvents = '';
                 if (typeof uploadBtn !== 'undefined' && uploadBtn) uploadBtn.disabled = false;
             }
         });
     }
 
+
+    // Cancels the queued or active transcription on the server and aborts the pending HTTP request
+    if (abortBtn) {
+
+        abortBtn.addEventListener('click', async () => {
+
+            if (!currentFileInQueue) return;
+
+            abortBtn.disabled = true;
+            transcriptionText.value = 'Cancelling transcription...';
+
+            const fileToAbort = currentFileInQueue;
+
+            try {
+                await fetch(`${URL_PROXY}/abort`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: fileToAbort }),
+                    keepalive: true
+                });
+            } catch (err) {
+                console.error('Error sending abort request:', err);
+            }
+
+            if (currentAbortController) currentAbortController.abort();
+        });
+    }
 
 
     // Allows the user to copy the entire transcript to the clipboard with a single click
@@ -274,6 +326,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 */
 
+
     // Allows the user to generate a file with the entire transcript with a single click
     // and provides temporary visual confirmation on the button itself.
     if (txtBtn) {
@@ -310,6 +363,4 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-
-
 });
