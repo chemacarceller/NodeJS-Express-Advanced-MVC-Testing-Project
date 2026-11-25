@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const layoutWrapper = document.getElementById('auLayoutWrapper');
     const fileInput = document.getElementById('audioInput');
     const dropZone = document.getElementById('dropZone');
-    const previewBox = document.getElementById('previewBox');
+    let previewBox = document.getElementById('previewBox');
     const fileNameDisplay = document.getElementById('fileName');
     const audioPreview = document.getElementById('audioPreview');
     const uploadBtn = document.getElementById('uploadBtn');
@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Global variable, used in several event handler functions
     let uploadedFileName = null;
+    let originalUploadedFileName = null;
 
     // AddEventListeners...
 
@@ -44,6 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             layoutWrapper.classList.remove('has-transcription');
             transcriptionText.value = '';
             uploadedFileName = null;
+            originalUploadedFileName = null;
         });
     }
 
@@ -110,6 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (response.ok) {
                     showStatus(`✅ Success: ${data.message} (${data.filename})`, 'success');
                     uploadedFileName = data.filename;
+                    originalUploadedFileName = file.name;
                     transcribeBtn.style.display = 'block';
                 } else {
                     showStatus(`❌ Error: ${data.error}`, 'error');
@@ -119,6 +122,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error(error);
             } finally {
                 uploadBtn.disabled = false;
+                transcribeBtn.disabled = false;
             }
         });
     }
@@ -135,6 +139,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         transcribeBtn.addEventListener('click', async () => {
 
             if (!uploadedFileName || isTranscribing) return;
+
+            if (txtBtn) txtBtn.disabled = true;
+            if (copyBtn) copyBtn.disabled = true;
 
             const myFileName = uploadedFileName.split(/[\\/]/).pop();
             currentFileInQueue = myFileName;
@@ -207,6 +214,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     transcriptionText.value = 'Transcription cancelled by user.';
                     transcribeBtn.style.display = 'none';
                     uploadedFileName = null;
+                    originalUploadedFileName = null
                 } else {
                     transcriptionText.value = 'Connection error while attempting to transcribe the audio.';
                     console.error(error);
@@ -217,16 +225,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                 isTranscribing = false;
                 currentAbortController = null;
                 currentFileInQueue = null;
-                transcribeBtn.disabled = false;
+                transcribeBtn.disabled = true;
 
                 if (abortBtn) {
                     abortBtn.style.display = 'none';
                     abortBtn.disabled = false;
                 }
 
-                if (fileInputEl) fileInputEl.disabled = false;
+                if (fileInputEl) { 
+                    fileInputEl.value = '';
+                    fileInputEl.disabled = false;
+                }
+
+                if (previewBox) {
+                    previewBox.style.display = 'none';
+                    const audio = previewBox.querySelector('audio');
+                    if (audio) audio.src = '';
+                }
+
                 if (dropZoneEl) dropZoneEl.style.pointerEvents = '';
                 if (typeof uploadBtn !== 'undefined' && uploadBtn) uploadBtn.disabled = false;
+                if (typeof txtBtn !== 'undefined' && txtBtn) txtBtn.disabled = false;
+                if (typeof copyBtn !== 'undefined' && copyBtn) copyBtn.disabled = false;
             }
         });
     }
@@ -339,7 +359,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             try {
 
-                const baseName = fileInput.files.item(0)?.name.replace(/\.[^/.]+$/, '') || 'transcripcion';
+                const baseName = originalUploadedFileName?.replace(/\.[^/.]+$/, '') || 'transcription';
 
                 const blob = new Blob([transcriptionText.value], { type: 'text/plain;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
